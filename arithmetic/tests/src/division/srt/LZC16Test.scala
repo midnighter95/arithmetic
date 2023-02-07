@@ -11,7 +11,8 @@ object LZC16Test extends TestSuite with ChiselUtestTester{
   def tests: Tests = Tests {
     test("LZC16 should pass") {
       def testcase() = {
-        val p: Int = Random.nextInt(1024)
+        val r: Int = Random.nextInt(16)
+        val p = BigInt(r,Random)
         def zeroCount(x: BigInt): Int = {
           var flag = false
           var a: Int =15
@@ -36,14 +37,13 @@ object LZC16Test extends TestSuite with ChiselUtestTester{
             dut.io.a.poke(p.U)
 //            println("Z = " + dut.io.z.peek().litValue.toString())
 //            println("V = " + dut.io.v.peek().litValue.toString())
-
             dut.io.z.expect(z_ex.U)
-            //dut.io.v.expect(1.U)
+            dut.io.v.expect(v_ex.U)
 
         }
       }
 
-      for (i <- 1 to 100) {
+      for (i <- 1 to 16) {
         testcase()
       }
 
