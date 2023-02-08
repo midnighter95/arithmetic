@@ -3,8 +3,11 @@ package utils
 import chisel3._
 import chisel3.util._
 
-/** ~z = zerocount
-  * if allzero, v = 0 z = b0000
+/** 16-bits Leading Zero Counter using 2 LZC8
+  *
+  * z for zero number
+  * v for all-zero indicator
+  * zero number = ~z
   */
 class LZC16 extends Module{
   val io = IO(new Bundle{

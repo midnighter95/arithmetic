@@ -22,14 +22,12 @@ object LZC16Test extends TestSuite with ChiselUtestTester{
           }
           15 - (a + 1)
         }
-
-//        println("Input = " + p.toBinaryString)
-//        println("zeroCount = " + zeroCount(p))
         val z_ex = if (p==0) 0 else 15-zeroCount(p)
         val v_ex = if (p==0) 0 else 1
+//        println("Input = " + p.toBinaryString)
+//        println("zeroCount = " + zeroCount(p))
 //        println("z_ex=" + z_ex)
 //        println("v_ex=" + v_ex)
-
         testCircuit(new LZC16,
           Seq(chiseltest.internal.NoThreadingAnnotation,
             chiseltest.simulator.WriteVcdAnnotation)) {
@@ -42,13 +40,9 @@ object LZC16Test extends TestSuite with ChiselUtestTester{
 
         }
       }
-
       for (i <- 1 to 16) {
         testcase()
       }
-
-
     }
-
   }
 }
