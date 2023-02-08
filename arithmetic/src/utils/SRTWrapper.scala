@@ -1,13 +1,11 @@
 package utils
 
+import Chisel.Cat
 import chisel3._
 import chisel3.util.RegEnable
 
 
-/** SRT Wrapper to pre-processer dividend and divisor
-  *
-  * doesn't check ((divider == 0) || (divider > dividend) || ( <= 0))
-  *
+/** 32bit SRT Wrapper to pre-processer dividend and divisor
   * @todo use one LZC32
   */
 class SRTWrapper extends Module{
@@ -20,30 +18,35 @@ class SRTWrapper extends Module{
   })
   val LZC0 = Module(new LZC32)
   val LZC1 = Module(new LZC32)
-  // Mux for dividend and divisor
   LZC0.io.a := io.dividendIn
   LZC1.io.a := io.divisorIn
-//  val zeroHeadDividend: Int = m - zeroCheck(dividend)
-//  val zeroHeadDivider: Int = m - zeroCheck(divider)
-//  val needComputerWidth: Int = zeroHeadDivider - zeroHeadDividend + 1 + radixLog2 - 1
-//  val noguard: Boolean = needComputerWidth % radixLog2 == 0
-//  val counter: Int = (needComputerWidth + 1) / 2
-//  if ((divider == 0) || (divider > dividend) || ( <= 0))
-//    return
-//  val quotient: BigInt = dividend / divider
-//  val remainder: BigInt = dividend % divider
-//  val leftShiftWidthDividend: Int = zeroHeadDividend - (if (noguard) 0 else 1)
-//  val leftShiftWidthDivider: Int = zeroHeadDivider
-  val zeroHeadDividend = Wire(UInt(5.W))
-  val zeroHeadDivisor = Wire(UInt(5.W))
+
+  // 6-bits , above zero
+  // add one bit for calculate complement
+  val zeroHeadDividend = Wire(UInt(6.W))
+  val zeroHeadDivisor = Wire(UInt(6.W))
   zeroHeadDividend := ~LZC0.io.z
-  zeroHeadDivisor  := ~LZC1.io.z
-  val substract = addition.prefixadder.koggeStone((~zeroHeadDividend).asUInt,zeroHeadDivisor,false.B)
-  val needComputerWidth = addition.prefixadder.koggeStone(substract, 2.U, false.B)
+  zeroHeadDivisor := ~LZC1.io.z
+
+  // sub = zeroHeadDivider - zeroHeadDividend
+  val sub = Wire(UInt(6.W))
+  sub := addition.prefixadder.koggeStone(-zeroHeadDividend, zeroHeadDivisor, false.B)
+
+  // needComputerWidth: Int = zeroHeadDivider - zeroHeadDividend + 2
+  val needComputerWidth = Wire(UInt(7.W))
+  needComputerWidth := addition.prefixadder.koggeStone(sub, 2.U, false.B)
+
+  // noguard: Boolean = needComputerWidth % radixLog2 == 0
   val noguard = !needComputerWidth(0)
-  val counter = (needComputerWidth >>1).asUInt
-  val leftShiftWidthDividend = Mux(noguard, zeroHeadDividend,addition.prefixadder.koggeStone(zeroHeadDividend,(~1.U).asUInt,false.B))
-  val leftShiftWidthDivisor = zeroHeadDivisor
+
+  // counter: Int = (needComputerWidth + 1) / 2
+  val counter = (addition.prefixadder.koggeStone(needComputerWidth, 1.U, false.B) >> 1).asUInt
+  // leftShiftWidthDividend: Int = zeroHeadDividend - (if (noguard) 0 else 1)
+  val leftShiftWidthDividend = Wire(UInt(6.W))
+  val leftShiftWidthDivisor = Wire(UInt(6.W))
+  leftShiftWidthDividend := Mux(noguard,zeroHeadDividend(4,0),
+                                addition.prefixadder.koggeStone(zeroHeadDividend(4,0), "b111111".asUInt, false.B))
+  leftShiftWidthDivisor := zeroHeadDivisor(4,0)
   io.divisorOut := io.divisorIn << leftShiftWidthDivisor
   io.dividendOut := io.dividendIn << leftShiftWidthDividend
   io.counter := counter
