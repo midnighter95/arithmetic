@@ -34,11 +34,11 @@ class SRTWrapper extends Module{
 //  val remainder: BigInt = dividend % divider
 //  val leftShiftWidthDividend: Int = zeroHeadDividend - (if (noguard) 0 else 1)
 //  val leftShiftWidthDivider: Int = zeroHeadDivider
-  val zeroHeadDividend = UInt(5.W)
-  val zeroHeadDivisor = UInt(5.W)
+  val zeroHeadDividend = Wire(UInt(5.W))
+  val zeroHeadDivisor = Wire(UInt(5.W))
   zeroHeadDividend := ~LZC0.io.z
   zeroHeadDivisor  := ~LZC1.io.z
-  val substract =  addition.prefixadder.koggeStone((~zeroHeadDividend).asUInt,zeroHeadDivisor,false.B)
+  val substract = addition.prefixadder.koggeStone((~zeroHeadDividend).asUInt,zeroHeadDivisor,false.B)
   val needComputerWidth = addition.prefixadder.koggeStone(substract, 2.U, false.B)
   val noguard = !needComputerWidth(0)
   val counter = (needComputerWidth >>1).asUInt
