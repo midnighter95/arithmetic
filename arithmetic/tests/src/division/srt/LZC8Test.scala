@@ -13,7 +13,8 @@ object LZC8Test extends TestSuite with ChiselUtestTester{
   def tests: Tests = Tests {
     test("LZC8 should pass") {
       def testcase() = {
-        val p: Int = Random.nextInt(256)
+        val r: Int = Random.nextInt(8)
+        val p:Int = BigInt(r,Random).toInt
         def zeroCount(x: BigInt): Int = {
           var flag = false
           var a: Int = 7
@@ -23,13 +24,12 @@ object LZC8Test extends TestSuite with ChiselUtestTester{
           }
           7 - (a + 1)
         }
-//        println("Input = " + p.toBinaryString)
-//        println("zeroCount = " + zeroCount(p))
         val z_ex = if (p==0) 0 else 7-zeroCount(p)
         val v_ex = if (p==0) 0 else 1
+//        println("Input = " + p.toBinaryString)
+//        println("zeroCount = " + zeroCount(p))
 //        println("z_ex=" + z_ex)
 //        println("v_ex=" + v_ex)
-
         testCircuit(new LZC8,
           Seq(chiseltest.internal.NoThreadingAnnotation,
             chiseltest.simulator.WriteVcdAnnotation)) {
@@ -46,6 +46,5 @@ object LZC8Test extends TestSuite with ChiselUtestTester{
         testcase()
       }
     }
-
   }
 }

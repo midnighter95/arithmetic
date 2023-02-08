@@ -22,15 +22,13 @@ object LZC32Test extends TestSuite with ChiselUtestTester{
           }
           31 - (a + 1)
         }
-
+        val z_ex = if (p==0) 0 else 31-zeroCount(p)
+        val v_ex = if (p==0) 0 else 1
 //        println("Input = " + p.toBinaryString)
 //        println("Input = " + p.toString)
 //        println("zeroCount = " + zeroCount(p))
-        val z_ex = if (p==0) 0 else 31-zeroCount(p)
-        val v_ex = if (p==0) 0 else 1
 //        println("z_ex=" + z_ex)
 //        println("v_ex=" + v_ex)
-
         testCircuit(new LZC32,
           Seq(chiseltest.internal.NoThreadingAnnotation,
             chiseltest.simulator.WriteVcdAnnotation)) {
@@ -43,13 +41,9 @@ object LZC32Test extends TestSuite with ChiselUtestTester{
 
         }
       }
-
       for (i <- 1 to 32) {
         testcase()
       }
-
-
     }
-
   }
 }

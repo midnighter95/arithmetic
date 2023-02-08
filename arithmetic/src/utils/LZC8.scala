@@ -8,8 +8,15 @@ import chisel3.internal.firrtl.Width
 import chisel3.util._
 import spire.math
 import utils.leftShift
-/** ~z = zerocount
-  * if allzero, v = 0 z = b000
+/** Basic 8-bits Leading Zero Counter
+  *
+  * z for zero number
+  * v for all-zero indicator
+  * if input is all zero, vz = 4b0000
+  * zero number = ~z
+  *
+  * @see Miao J, Li S. A design for high speed leading-zero counter[C]//2017
+  *      IEEE International Symposium on Consumer Electronics (ISCE). IEEE, 2017: 22-23.
   */
 class LZC8 extends Module{
   val io = IO(new Bundle{
@@ -17,7 +24,6 @@ class LZC8 extends Module{
     val z = Output(UInt(3.W))
     val v = Output(UInt(1.W))
   })
-  //val a = Wire(UInt(8.W))
   val a = io.a
   val z0 : UInt = (!(a(7) | (!a(6)) & a(5))) & ((a(6) | a(4)) | !(a(3) | (!a(2) & a(1))))
   val z1 : UInt = !(a(7) | a(6)) & ((a(5) | a(4)) | !(a(3) | a(2)))
