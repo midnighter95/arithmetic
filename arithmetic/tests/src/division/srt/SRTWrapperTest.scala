@@ -42,26 +42,34 @@ object SRTWrapperTest extends TestSuite with ChiselUtestTester {
         val leftShiftWidthDividend: Int = zeroHeadDividend - (if (noguard) 0 else 1)
         val leftShiftWidthDivider: Int = zeroHeadDivider
 
-        println("dividend = %8x, dividend = %d ".format(dividend, dividend))
-        println("divider  = %8x, divider  = %d".format(divider, divider))
-        println("zeroHeadDividend_ex  = %d".format(zeroHeadDividend))
-        println("zeroHeadDivider_ex   = %d".format(zeroHeadDivider))
+//        println("dividend = %8x, dividend = %d ".format(dividend, dividend))
+//        println("divider  = %8x, divider  = %d".format(divider, divider))
+//        println("zeroHeadDividend_ex  = %d".format(zeroHeadDividend))
+//        println("zeroHeadDivider_ex   = %d".format(zeroHeadDivider))
+//        println("noguard = "+ noguard)
 //        println("quotient   = %d,  remainder  = %d".format(quotient, remainder))
-//        println("counter   = %d, needComputerWidth = %d".format(counter, needComputerWidth))
+//        println("counter_ex   = %d, needComputerWidth_ex = %d".format(counter, needComputerWidth))
         // test
         testCircuit(new SRTWrapper,
           Seq(chiseltest.internal.NoThreadingAnnotation,
             chiseltest.simulator.WriteVcdAnnotation)) {
           dut: SRTWrapper =>
-            dut.io.dividendIn := dividend.asUInt
-            dut.io.divisorIn := divider.asUInt
-            println("zeroHeadDividend  = %d".format(dut.zeroHeadDividend.peek().litValue))
-            println("zeroHeadDivider   = %d".format(dut.zeroHeadDivisor.peek().litValue))
+            dut.io.dividendIn.poke(dividend.asUInt)
+            dut.io.divisorIn.poke(divider.asUInt)
+            dut.io.dividendOut.expect(dividend << leftShiftWidthDividend)
+            dut.io.divisorOut.expect(divider << leftShiftWidthDivider)
+            dut.io.counter.expect(counter.U)
+//            println("zeroHeadDividend  = %d".format(dut.io.zeroHeadDividend.peek().litValue))
+//            println("zeroHeadDivider   = %d".format(dut.io.zeroHeadDivisor.peek().litValue))
+//            println("sub   = "  +  (dut.io.sub.peek()))
+//            println("needComputerWidth = "+  dut.io.needComputerWidth.peek().litValue)
+//            println("counter = " + dut.io.counter.peek().litValue )
+//            println("left = " + dut.io.leftShiftWidthDividend.peek().litValue)
         }
       }
 
 
-      for( i <- 1 to 5){
+      for( i <- 1 to 20){
         testcase(32)
       }
     }
