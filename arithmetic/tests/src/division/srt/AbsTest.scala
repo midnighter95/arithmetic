@@ -28,7 +28,7 @@ object AbsTest extends TestSuite with ChiselUtestTester{
 //        println("zeroCount = " + zeroCount(p))
 //        println("z_ex=" + z_ex)
 //        println("v_ex=" + v_ex)
-        testCircuit(new Abs,
+        testCircuit(new Abs(32),
           Seq(chiseltest.internal.NoThreadingAnnotation,
             chiseltest.simulator.WriteVcdAnnotation)) {
           dut : Abs =>
