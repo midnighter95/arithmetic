@@ -38,6 +38,13 @@ class SRT4(
   val dividerNext = Wire(UInt(dividerWidth.W))
   val counterNext = Wire(UInt(log2Ceil(n).W))
 
+  //StateMachine
+  // false : idle
+  // true : working
+  val stateNext = Wire(Bool())
+  val state = RegNext(stateNext, false.B)
+  stateNext := Mux(input.fire, true.B, Mux(isLastCycle, false.B, state))
+
   // Control
   // sign of Cycle, true -> (counter === 0.U)
   val isLastCycle, enable: Bool = Wire(Bool())
@@ -54,8 +61,8 @@ class SRT4(
   //  Datapath
   //  according two adders
   isLastCycle := !counter.orR
-  output.valid := isLastCycle
-  input.ready := isLastCycle
+  output.valid := Mux(state, isLastCycle, false.B)
+  input.ready := !state
   enable := input.fire || !isLastCycle
 
   val remainderNoCorrect: UInt = partialReminderSum + partialReminderCarry
