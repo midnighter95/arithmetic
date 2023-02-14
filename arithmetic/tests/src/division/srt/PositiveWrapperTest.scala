@@ -19,14 +19,10 @@ object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
         val q: Int = Random.nextInt(m-2)
         val dividend: BigInt = BigInt(p, Random) 
         val divisor: BigInt = BigInt(q, Random)
-        if ((divisor == 0) || (divisor.abs > dividend.abs)) return
+        if (divisor == 0) return
         val quotient_ex = dividend / divisor
         val remainder_ex = dividend % divisor
 
-        if ((divisor == 0) )
-          return
-
-        //println("%d / %d = %d --- %d".format(dividend,divisor,quotient_ex,remainder_ex))
         // test
         testCircuit(new finalWrapper,
           Seq(chiseltest.internal.NoThreadingAnnotation,
@@ -43,7 +39,10 @@ object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
             for (a <- 1 to 1000 if !flag) {
               if (dut.output.valid.peek().litValue == 1) {
                 flag = true
-                //println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
+                println("%d / %d = %d --- %d".format(dividend,divisor,quotient_ex,remainder_ex))
+                println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
+                println("%d / %d ".format(dut.debug.dividend.peek().litValue,dut.debug.divisor.peek().litValue))
+                println("bigdivisor = %d".format(dut.debug.bigdivisor.peek().litValue))
                 utest.assert(dut.output.bits.quotient.peek().litValue == quotient_ex)
                 utest.assert(dut.output.bits.reminder.peek().litValue == remainder_ex)
               }
