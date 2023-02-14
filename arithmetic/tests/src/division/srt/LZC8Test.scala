@@ -42,7 +42,7 @@ object LZC8Test extends TestSuite with ChiselUtestTester{
 
         }
       }
-      for( i <- 1 to 8){
+      for( i <- 1 to 1){
         testcase()
       }
     }

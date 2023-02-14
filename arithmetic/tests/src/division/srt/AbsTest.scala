@@ -36,10 +36,10 @@ object AbsTest extends TestSuite with ChiselUtestTester{
             dut.io.bIn.poke((100).S)
             dut.io.signIn.poke(true.B)
 
-            println("a = " + dut.io.aOut.peek())
-            println("b = " + dut.io.bOut.peek())
-            println("aSign = " + dut.io.aSign.peek().litValue.toString())
-            println("bSign = " + dut.io.bSign.peek().litValue.toString())
+//            println("a = " + dut.io.aOut.peek())
+//            println("b = " + dut.io.bOut.peek())
+//            println("aSign = " + dut.io.aSign.peek().litValue.toString())
+//            println("bSign = " + dut.io.bSign.peek().litValue.toString())
 
 
         }

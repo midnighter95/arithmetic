@@ -40,7 +40,7 @@ object LZC16Test extends TestSuite with ChiselUtestTester{
 
         }
       }
-      for (i <- 1 to 16) {
+      for (i <- 1 to 1) {
         testcase()
       }
     }

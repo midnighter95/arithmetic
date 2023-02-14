@@ -7,9 +7,9 @@ import utest.{TestSuite, _}
 
 import scala.util.Random
 
-object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
+object NegativeWrapperTest extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
-    test("Positive should pass") {
+    test("Negative should pass") {
       def testcase(): Unit ={
         // parameters
         val radixLog2: Int = 2
@@ -17,16 +17,11 @@ object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
         val m: Int = 10
         val p: Int = Random.nextInt(m)
         val q: Int = Random.nextInt(m-2)
-        val dividend: BigInt = BigInt(p, Random) 
+        val dividend: BigInt = BigInt(p, Random)  * (-1)
         val divisor: BigInt = BigInt(q, Random)
         if ((divisor == 0) || (divisor.abs > dividend.abs)) return
         val quotient_ex = dividend / divisor
         val remainder_ex = dividend % divisor
-
-        if ((divisor == 0) )
-          return
-
-        //println("%d / %d = %d --- %d".format(dividend,divisor,quotient_ex,remainder_ex))
         // test
         testCircuit(new finalWrapper,
           Seq(chiseltest.internal.NoThreadingAnnotation,
@@ -43,7 +38,9 @@ object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
             for (a <- 1 to 1000 if !flag) {
               if (dut.output.valid.peek().litValue == 1) {
                 flag = true
-                //println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
+//                println("%d / %d = %d --- %d".format(dividend,divisor,quotient_ex,remainder_ex))
+//                println("remainder = %d ".format(dut.debug.remainder.peek().litValue))
+//                println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
                 utest.assert(dut.output.bits.quotient.peek().litValue == quotient_ex)
                 utest.assert(dut.output.bits.reminder.peek().litValue == remainder_ex)
               }
@@ -55,7 +52,7 @@ object PositiveWrapperTest extends TestSuite with ChiselUtestTester {
       }
 
 
-      for( i <- 1 to 20){
+      for( i <- 1 to 32){
         testcase()
       }
     }

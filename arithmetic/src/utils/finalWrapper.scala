@@ -26,7 +26,6 @@ class finalWrapper extends Module{
   val input = IO(Flipped(DecoupledIO(new SRTIn)))
   val signIn = IO(Input(Bool()))
   val output = IO(ValidIO(new SRTOut))
-
   //abs
   val abs = Module(new Abs(32))
   abs.io.aIn := input.bits.dividend
@@ -67,8 +66,8 @@ class finalWrapper extends Module{
   leftShiftWidthDivisor := zeroHeadDivisor(4,0)
 
   // do SRT
-  srt.input.bits.divider := input.bits.divisor.asUInt << leftShiftWidthDivisor
-  srt.input.bits.dividend := input.bits.dividend.asUInt << leftShiftWidthDividend
+  srt.input.bits.dividend := abs.io.aOut << leftShiftWidthDividend
+  srt.input.bits.divider := abs.io.bOut << leftShiftWidthDivisor
   srt.input.bits.counter := counter
   srt.input.valid := input.valid && !(input.bits.divisor === 0.S)
   input.ready := srt.input.ready
@@ -78,7 +77,10 @@ class finalWrapper extends Module{
   divideZero := (input.bits.divisor === 0.S) && input.fire
 
   // post-process
+  val remainderOrigin = Wire(UInt(32.W))
+
+  remainderOrigin := srt.output.bits.reminder >> zeroHeadDivisor
   output.valid := srt.output.valid | divideZero
   output.bits.quotient := Mux(divideZero,"hffffffff".U(32.W), Mux(negative, -srt.output.bits.quotient, srt.output.bits.quotient)).asSInt
-  output.bits.reminder := Mux(abs.io.aSign, -(srt.output.bits.reminder >> zeroHeadDivisor).asUInt, srt.output.bits.reminder >> zeroHeadDivisor).asSInt
+  output.bits.reminder := Mux(abs.io.aSign, -remainderOrigin, remainderOrigin).asSInt
 }
