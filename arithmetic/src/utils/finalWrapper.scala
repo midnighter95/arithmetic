@@ -9,16 +9,23 @@ class SRTIn extends Bundle {
   val dividend = UInt(32.W)
   val divisor = UInt(32.W)
 }
+/** input: oprand1 oprand2 singed
+  * output: quient and remainder
+  *
+  * condition:
+  * divede 0
+  * negative input
+  */
 class finalWrapper extends Module{
 
   val input = IO(Flipped(DecoupledIO(new SRTIn)))
-  val signIn = Input(Bool())
+  val signIn = IO(Input(Bool()))
   val output = IO(ValidIO(new SRTOutput(32, 32)))
 
   //abs
   val abs = Module(new Abs(32))
-  abs.io.aIn := input.bits.dividend
-  abs.io.bIn := input.bits.divisor
+  abs.io.aIn := input.bits.dividend.asSInt
+  abs.io.bIn := input.bits.divisor.asSInt
   abs.io.signIn := signIn
   val negative = abs.io.aSign ^ abs.io.bSign
 
