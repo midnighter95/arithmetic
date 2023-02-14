@@ -17,9 +17,9 @@ object FinalWrapperTest extends TestSuite with ChiselUtestTester {
         val m: Int = 5
         val p: Int = Random.nextInt(8)
         val q: Int = Random.nextInt(8)
-        val dividend: BigInt = BigInt(p, Random)
+        val dividend: BigInt = BigInt(p, Random) 
         val divisor: BigInt = BigInt(q, Random)
-        if ((divisor == 0) || (divisor > dividend)) return
+        if ((divisor == 0) || (divisor.abs > dividend.abs)) return
         val quotient_ex = dividend / divisor
         val remainder_ex = dividend % divisor
 
@@ -47,8 +47,8 @@ object FinalWrapperTest extends TestSuite with ChiselUtestTester {
 //            println("left = " + dut.io.leftShiftWidthDividend.peek().litValue)
             dut.clock.setTimeout(0)
             dut.input.valid.poke(true.B)
-            dut.input.bits.dividend.poke(dividend.U)
-            dut.input.bits.divisor.poke(divisor.U)
+            dut.input.bits.dividend.poke(dividend.S)
+            dut.input.bits.divisor.poke(divisor.S)
             dut.signIn.poke(true.B)
             dut.clock.step()
             dut.input.valid.poke(false.B)

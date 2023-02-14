@@ -6,8 +6,13 @@ import chisel3.util._
 import division.srt.{SRT, SRTOutput}
 
 class SRTIn extends Bundle {
-  val dividend = UInt(32.W)
-  val divisor = UInt(32.W)
+  val dividend = SInt(32.W)
+  val divisor = SInt(32.W)
+}
+
+class SRTOut extends Bundle {
+  val reminder = SInt(32.W)
+  val quotient = SInt(32.W)
 }
 /** input: oprand1 oprand2 singed
   * output: quient and remainder
@@ -20,12 +25,12 @@ class finalWrapper extends Module{
 
   val input = IO(Flipped(DecoupledIO(new SRTIn)))
   val signIn = IO(Input(Bool()))
-  val output = IO(ValidIO(new SRTOutput(32, 32)))
+  val output = IO(ValidIO(new SRTOut))
 
   //abs
   val abs = Module(new Abs(32))
-  abs.io.aIn := input.bits.dividend.asSInt
-  abs.io.bIn := input.bits.divisor.asSInt
+  abs.io.aIn := input.bits.dividend
+  abs.io.bIn := input.bits.divisor
   abs.io.signIn := signIn
   val negative = abs.io.aSign ^ abs.io.bSign
 
@@ -62,18 +67,18 @@ class finalWrapper extends Module{
   leftShiftWidthDivisor := zeroHeadDivisor(4,0)
 
   // do SRT
-  srt.input.bits.divider := input.bits.divisor << leftShiftWidthDivisor
-  srt.input.bits.dividend := input.bits.dividend << leftShiftWidthDividend
+  srt.input.bits.divider := input.bits.divisor.asUInt << leftShiftWidthDivisor
+  srt.input.bits.dividend := input.bits.dividend.asUInt << leftShiftWidthDividend
   srt.input.bits.counter := counter
-  srt.input.valid := input.valid && !(input.bits.divisor === 0.U)
+  srt.input.valid := input.valid && !(input.bits.divisor === 0.S)
   input.ready := srt.input.ready
 
   // logic
   val divideZero = Wire(Bool())
-  divideZero := (input.bits.divisor === 0.U) && input.fire
+  divideZero := (input.bits.divisor === 0.S) && input.fire
 
   // post-process
   output.valid := srt.output.valid | divideZero
-  output.bits.quotient := Mux(divideZero,"hffffffff".U(32.W), Mux(negative, -srt.output.bits.quotient, srt.output.bits.quotient))
-  output.bits.reminder := Mux(abs.io.aSign, -(srt.output.bits.reminder >> zeroHeadDivisor).asUInt, srt.output.bits.reminder >> zeroHeadDivisor)
+  output.bits.quotient := Mux(divideZero,"hffffffff".U(32.W), Mux(negative, -srt.output.bits.quotient, srt.output.bits.quotient)).asSInt
+  output.bits.reminder := Mux(abs.io.aSign, -(srt.output.bits.reminder >> zeroHeadDivisor).asUInt, srt.output.bits.reminder >> zeroHeadDivisor).asSInt
 }
