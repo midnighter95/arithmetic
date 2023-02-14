@@ -15,8 +15,8 @@ object FinalWrapperTest extends TestSuite with ChiselUtestTester {
         val radixLog2: Int = 2
         val n: Int = 6
         val m: Int = 5
-        val p: Int = Random.nextInt(5)
-        val q: Int = Random.nextInt(5)
+        val p: Int = Random.nextInt(8)
+        val q: Int = Random.nextInt(8)
         val dividend: BigInt = BigInt(p, Random)
         val divisor: BigInt = BigInt(q, Random)
         if ((divisor == 0) || (divisor > dividend)) return
@@ -56,8 +56,7 @@ object FinalWrapperTest extends TestSuite with ChiselUtestTester {
             for (a <- 1 to 1000 if !flag) {
               if (dut.output.valid.peek().litValue == 1) {
                 flag = true
-                println("quotient=(%d/%d)".format(dut.output.bits.quotient.peek().litValue, quotient_ex))
-                println("remainder=(%d/%d)".format(dut.output.bits.reminder.peek().litValue, remainder_ex))
+                println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
               }
               dut.clock.step()
             }

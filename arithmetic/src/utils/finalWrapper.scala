@@ -75,5 +75,5 @@ class finalWrapper extends Module{
   // post-process
   output.valid := srt.output.valid | divideZero
   output.bits.quotient := Mux(divideZero,"hffffffff".U(32.W), Mux(negative, -srt.output.bits.quotient, srt.output.bits.quotient))
-  output.bits.reminder := Mux(abs.io.aSign, -srt.output.bits.reminder, srt.output.bits.reminder)
+  output.bits.reminder := Mux(abs.io.aSign, -(srt.output.bits.reminder >> zeroHeadDivisor).asUInt, srt.output.bits.reminder >> zeroHeadDivisor)
 }
