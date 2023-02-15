@@ -19,7 +19,7 @@ object NegativeWrapperTest extends TestSuite with ChiselUtestTester {
         val q: Int = Random.nextInt(m-2)
         val dividend: BigInt = BigInt(p, Random)  * (-1)
         val divisor: BigInt = BigInt(q, Random)
-        if ((divisor == 0) || (divisor.abs > dividend.abs)) return
+        if ((divisor == 0)) return
         val quotient_ex = dividend / divisor
         val remainder_ex = dividend % divisor
         // test
@@ -39,8 +39,10 @@ object NegativeWrapperTest extends TestSuite with ChiselUtestTester {
               if (dut.output.valid.peek().litValue == 1) {
                 flag = true
 //                println("%d / %d = %d --- %d".format(dividend,divisor,quotient_ex,remainder_ex))
-//                println("remainder = %d ".format(dut.debug.remainder.peek().litValue))
 //                println("%d / %d = %d --- %d".format(dividend,divisor,dut.output.bits.quotient.peek().litValue,dut.output.bits.reminder.peek().litValue))
+//                println("bigdivisor = %d".format(dut.debug.bigdivisor.peek().litValue))
+//                println("bSign = %b".format(dut.debug.dividendSign))
+//                println(("remainderAbs = %d".format(dut.debug.remainderAbs.peek().litValue)))
                 utest.assert(dut.output.bits.quotient.peek().litValue == quotient_ex)
                 utest.assert(dut.output.bits.reminder.peek().litValue == remainder_ex)
               }

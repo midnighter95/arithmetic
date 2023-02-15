@@ -26,12 +26,7 @@ class finalWrapper extends Module{
   val input = IO(Flipped(DecoupledIO(new SRTIn)))
   val signIn = IO(Input(Bool()))
   val output = IO(ValidIO(new SRTOut))
-  val debug = IO(new Bundle() {
-    val bigdivisor = Output(Bool())
-    val dividend = Output(UInt(32.W))
-    val divisor = Output(UInt(32.W))
-    val gap = Output(UInt(33.W))
-  })
+
   //abs
   val abs = Module(new Abs(32))
   abs.io.aIn := input.bits.dividend
@@ -60,10 +55,6 @@ class finalWrapper extends Module{
   divisor := abs.io.bOut
   gap := addition.prefixadder.koggeStone(divisor, -dividend, false.B)
   val biggerdivisor = gap(33)  && !(gap(32,0).orR === false.B)
-  debug.dividend := dividend(31,0)
-  debug.divisor := divisor(31,0)
-  debug.gap := gap
-  debug.bigdivisor := biggerdivisor
 
   // 6-bits , above zero
   // add one bit for calculate complement
@@ -103,6 +94,7 @@ class finalWrapper extends Module{
   quotientAbs := srt.output.bits.quotient
   remainderAbs := srt.output.bits.reminder >> zeroHeadDivisor
 
+
   // if dividezero or biggerdivisor, bypass SRT
   output.valid := srt.output.valid | divideZero | biggerdivisor
   // the quotient of division by zero has all bits set, and the remainder of division by zero equals the dividend.
@@ -110,6 +102,6 @@ class finalWrapper extends Module{
     Mux(biggerdivisor, 0.U,
     Mux(negative, -quotientAbs, quotientAbs))).asSInt
   output.bits.reminder := Mux(divideZero, dividend(31,0),
-    Mux(biggerdivisor, dividend(31,0),
+    Mux(biggerdivisor, Mux(abs.io.aSign, -dividend(31,0), dividend(31,0)),
     Mux(abs.io.aSign, -remainderAbs, remainderAbs))).asSInt
 }
