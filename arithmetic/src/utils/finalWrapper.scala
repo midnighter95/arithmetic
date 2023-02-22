@@ -8,30 +8,36 @@ import division.srt.{SRT, SRTOutput}
 class SRTIn extends Bundle {
   val dividend = SInt(32.W)
   val divisor = SInt(32.W)
+  val signIn = Bool()
 }
 
 class SRTOut extends Bundle {
   val reminder = SInt(32.W)
   val quotient = SInt(32.W)
 }
-/** input: oprand1 oprand2 singed
+/** input: oprand1 oprand2 signed
   * output: quient and remainder
   *
-  * condition:
-  * divede 0
-  * negative input
+  * Input:
+  * dividend and divisor
+  * sign: true for signed input
+  *
+  * Component:
+  * divided by zero detection
+  * bigger divisor detection
+  * leading zero process
+  * sign process
   */
 class finalWrapper extends Module{
 
   val input = IO(Flipped(DecoupledIO(new SRTIn)))
-  val signIn = IO(Input(Bool()))
   val output = IO(ValidIO(new SRTOut))
 
   //abs
   val abs = Module(new Abs(32))
   abs.io.aIn := input.bits.dividend
   abs.io.bIn := input.bits.divisor
-  abs.io.signIn := signIn
+  abs.io.signIn := input.bits.signIn
   val negative = abs.io.aSign ^ abs.io.bSign
 
   //LZC
@@ -41,23 +47,26 @@ class finalWrapper extends Module{
   LZC1.io.a := abs.io.bOut
 
   val srt: SRT = Module(new SRT(32, 32, 32))
-  // pre-process
 
-  // dividezero logic
+  /** divided by zero detection */
   val divideZero = Wire(Bool())
   divideZero := (input.bits.divisor === 0.S) && input.fire
 
-  // dividend must > divisor
+  /** bigger divisor detection */
   val dividend = Wire(UInt(33.W))
   val divisor = Wire(UInt(33.W))
   val gap = Wire(UInt(34.W))
+  val biggerdivisor = Wire(Bool())
   dividend := abs.io.aOut
   divisor := abs.io.bOut
   gap := addition.prefixadder.koggeStone(divisor, -dividend, false.B)
-  val biggerdivisor = gap(33)  && !(gap(32,0).orR === false.B)
+  biggerdivisor := gap(33) && !(gap(32,0).orR === false.B) && input.fire
 
-  // 6-bits , above zero
-  // add one bit for calculate complement
+  // bypass
+  val bypassSRT = divideZero || biggerdivisor
+
+  /** Leading Zero component*/
+  // extend one bit for calculation
   val zeroHeadDividend = Wire(UInt(6.W))
   val zeroHeadDivisor = Wire(UInt(6.W))
   zeroHeadDividend := ~LZC0.io.z
@@ -83,20 +92,18 @@ class finalWrapper extends Module{
   srt.input.bits.dividend := abs.io.aOut << leftShiftWidthDividend
   srt.input.bits.divider := abs.io.bOut << leftShiftWidthDivisor
   srt.input.bits.counter := counter
-  // if dividezero or biggerdivisor; bypass SRT
-  srt.input.valid := input.valid && !(input.bits.divisor === 0.S) && (!biggerdivisor)
+  // if dividezero or biggerdivisor, bypass SRT
+  srt.input.valid := input.valid && !bypassSRT
   // copy srt ready to top
   input.ready := srt.input.ready
 
-  // deal with  sign issue
+  // post-process for sign
   val quotientAbs = Wire(UInt(32.W))
   val remainderAbs = Wire(UInt(32.W))
   quotientAbs := srt.output.bits.quotient
   remainderAbs := srt.output.bits.reminder >> zeroHeadDivisor
 
-
-  // if dividezero or biggerdivisor, bypass SRT
-  output.valid := srt.output.valid | divideZero | biggerdivisor
+  output.valid := srt.output.valid | bypassSRT
   // the quotient of division by zero has all bits set, and the remainder of division by zero equals the dividend.
   output.bits.quotient := Mux(divideZero,"hffffffff".U(32.W),
     Mux(biggerdivisor, 0.U,
