@@ -17,8 +17,12 @@ object SRT16WrapperTest extends TestSuite with ChiselUtestTester {
         val m: Int = n - 1
         val p: Int = Random.nextInt(m)
         val q: Int = Random.nextInt(m)
-        val dividend: BigInt = BigInt(p, Random)
-        val divisor: BigInt = BigInt(q, Random)
+        val signRandom1: Int = Random.nextInt(2)
+        val signRandom2: Int = Random.nextInt(2)
+        val sign1: Int = if (signRandom1 == 0) -1 else 1
+        val sign2: Int = if (signRandom2 == 0) -1 else 1
+        val dividend: BigInt = BigInt(p, Random) * sign1
+        val divisor: BigInt = BigInt(q, Random) * sign2
 
         if(divisor == 0) return
         val quotient_ex = dividend / divisor
@@ -78,7 +82,7 @@ object SRT16WrapperTest extends TestSuite with ChiselUtestTester {
         }
     }
 
-      for (i <- 1 to 20) {testcase(32)}
+      for (i <- 1 to 20) testcase(32)
     }
   }
 }
