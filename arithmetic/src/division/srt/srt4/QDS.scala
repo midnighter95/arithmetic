@@ -7,6 +7,15 @@ import chisel3.util.BitPat.bitPatToUInt
 import chisel3.util.experimental.decode.TruthTable
 import utils.{extend, sIntToBitPat}
 
+/** quotient divisor select
+  *
+  * @param rWidth todo
+  * @param ohWidth quotient Width
+  * @param partialDividerWidth equals to dTruncatedWidth - 1
+  * @param tables QDS table
+  *
+  * todo: replace partialDividerWidth
+  */
 class QDS(rWidth: Int, ohWidth: Int, partialDividerWidth: Int, tables: Seq[Seq[Int]], a: Int) extends Module {
   // IO
   val input = IO(Input(new QDSInput(rWidth, partialDividerWidth)))
@@ -45,7 +54,9 @@ class QDS(rWidth: Int, ohWidth: Int, partialDividerWidth: Int, tables: Seq[Seq[I
   val columnSelect = input.partialDivider
   val adderWidth = rWidth + 1
   val yTruncate: UInt = input.partialReminderCarry + input.partialReminderSum
+  /** the selection constant vector */
   val mkVec = selectRom(columnSelect)
+  /** add [[yTruncate]] with all mk, use decoder to find its location */
   val selectPoints = VecInit(mkVec.map { mk =>
     (extend(yTruncate, adderWidth).asUInt
       + extend(mk, adderWidth).asUInt).head(1)

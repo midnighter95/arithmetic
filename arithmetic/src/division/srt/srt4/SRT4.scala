@@ -18,6 +18,13 @@ import utils.leftShift
   * floor((-r*rho - 2^-t)_t) <= y^ <= floor((r*rho - ulp)_t)
   */
 
+/**SRT4
+  *
+  * @param n todo: it seems the width for quotient
+  * @param a digit set
+  * @param dTruncateWidth TruncateWidth for divisor
+  * @param rTruncateWidth TruncateWidth for residual
+  */
 class SRT4(
   dividendWidth:  Int,
   dividerWidth:   Int,
@@ -27,6 +34,7 @@ class SRT4(
   dTruncateWidth: Int = 4,
   rTruncateWidth: Int = 4)
     extends Module {
+  /** width for csa */
   val xLen: Int = dividendWidth + radixLog2 + 1
   val wLen: Int = xLen + radixLog2
   // IO
@@ -69,13 +77,16 @@ class SRT4(
   output.bits.reminder := Mux(needCorrect, remainderCorrect, remainderNoCorrect)(wLen - 4, radixLog2)
   output.bits.quotient := Mux(needCorrect, quotientMinusOne, quotient)
 
+  // todo:
   val rWidth: Int = 1 + radixLog2 + rTruncateWidth
   val tables: Seq[Seq[Int]] = SRTTable(1 << radixLog2, a, dTruncateWidth, rTruncateWidth).tablesToQDS
+  // todo: it will be the qds output width
   val ohWidth: Int = a match {
     case 2 => 2 * a + 1
     case 3 => 6
   }
   //qds
+  // in OneHot encoding
   val selectedQuotientOH: UInt =
     QDS(rWidth, ohWidth, dTruncateWidth - 1, tables, a)(
       leftShift(partialReminderSum, radixLog2).head(rWidth),
@@ -88,6 +99,7 @@ class SRT4(
   val csa: Vec[UInt] =
     if (a == 2) { // a == 2
       //csa
+      // decode quotient oneHot and calculate -qd
       val dividerMap = VecInit((-2 to 2).map {
         case -2 => divider << 1
         case -1 => divider
@@ -95,7 +107,10 @@ class SRT4(
         case 1  => Fill(1 + radixLog2, 1.U(1.W)) ## ~divider
         case 2  => Fill(radixLog2, 1.U(1.W)) ## ~(divider << 1)
       })
+      // qds Sing: if qdsOut = "b11000" or "10000" or "01000"
+      // if q is positive, add one to partialReminderCarry in the least bit
       val qdsSign = selectedQuotientOH(ohWidth - 1, ohWidth / 2 + 1).orR
+      /** todo why use head here */
       addition.csa.c32(
         VecInit(
           leftShift(partialReminderSum, radixLog2).head(wLen - radixLog2),

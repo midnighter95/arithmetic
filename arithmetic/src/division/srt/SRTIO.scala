@@ -4,6 +4,7 @@ import chisel3._
 import chisel3.util.log2Ceil
 // SRTIO
 class SRTInput(dividendWidth: Int, dividerWidth: Int, n: Int) extends Bundle {
+  /** residual[0] */
   val dividend = UInt(dividendWidth.W) //.***********
   val divider = UInt(dividerWidth.W) //.1**********
   val counter = UInt(log2Ceil(n).W) //the width of quotient.
@@ -30,6 +31,10 @@ class OTFOutput(qWidth: Int) extends Bundle {
 class QDSInput(rWidth: Int, partialDividerWidth: Int) extends Bundle {
   val partialReminderCarry: UInt = UInt(rWidth.W)
   val partialReminderSum:   UInt = UInt(rWidth.W)
+  /** truncated divisor with the -1 bit truncated either
+    *
+    * todo: use origin truncated divisor
+    */
   val partialDivider:       UInt = UInt(partialDividerWidth.W)
 }
 
