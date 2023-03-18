@@ -10,7 +10,7 @@ import division.srt._
 /** 32bit SRT Wrapper to pre-processer dividend and divisor
   * @todo use one LZC32
   */
-class SRT4Wrapper extends Module{
+class SRT4Wrapper extends Module {
   class SRTIn extends Bundle {
     val dividend = SInt(32.W)
     val divisor = SInt(32.W)
@@ -49,12 +49,13 @@ class SRT4Wrapper extends Module{
   dividend := abs.io.aOut
   divisor := abs.io.bOut
   gap := divisor +& (-dividend)
-  biggerdivisor := gap(33) && !(gap(32,0).orR === false.B)
+  biggerdivisor := gap(33) && !(gap(32, 0).orR === false.B)
+  val divisorIsOne = abs.io.bOut === 1.U
 
   // bypass
-  val bypassSRT = (divideZero || biggerdivisor) && input.fire
+  val bypassSRT = (divideZero || biggerdivisor || divisorIsOne) && input.fire
 
-  /** Leading Zero component*/
+  /** Leading Zero component */
   // extend one bit for calculation
   val zeroHeadDividend = Wire(UInt(6.W))
   val zeroHeadDivisor = Wire(UInt(6.W))
@@ -73,23 +74,34 @@ class SRT4Wrapper extends Module{
   // leftShiftWidthDividend: Int = zeroHeadDividend - (if (noguard) 0 else 1)
   val leftShiftWidthDividend = Wire(UInt(6.W))
   val leftShiftWidthDivisor = Wire(UInt(6.W))
-  leftShiftWidthDividend := Mux(noguard,zeroHeadDividend(4,0), zeroHeadDividend(4,0) +& "b111111".U)
-  leftShiftWidthDivisor := zeroHeadDivisor(4,0)
+  leftShiftWidthDividend := Mux(noguard, zeroHeadDividend(4, 0), zeroHeadDividend(4, 0) +& "b111111".U)
+  leftShiftWidthDivisor := zeroHeadDivisor(4, 0)
+  val rightshift = leftShiftWidthDividend(5)
+  val remainderNeedFix = dividend(0) & rightshift
 
   // keep mutiple cycles for SRT
   val negativeSRT = RegEnable(negative, srt.input.fire)
   val zeroHeadDivisorSRT = RegEnable(zeroHeadDivisor, srt.input.fire)
   val dividendSignSRT = RegEnable(abs.io.aSign, srt.input.fire)
+  val rightshiftSRT = RegEnable(rightshift, srt.input.fire)
+  val remainderNeedFixSRT = RegEnable(remainderNeedFix, srt.input.fire)
 
   // keep for one cycle
   val divideZeroReg = RegEnable(divideZero, false.B, input.fire)
   val biggerdivisorReg = RegEnable(biggerdivisor, false.B, input.fire)
+  val divisorIsOneReg = RegEnable(divisorIsOne, false.B, input.fire)
   val bypassSRTReg = RegNext(bypassSRT, false.B)
   val dividendReg = RegEnable(dividend, 0.U, input.fire)
   val dividendSignReg = RegEnable(abs.io.aSign, false.B, input.fire)
+  val divsorSignReg = RegEnable(abs.io.bSign, false.B, input.fire)
 
   // do SRT
-  srt.input.bits.dividend := abs.io.aOut << leftShiftWidthDividend
+
+  srt.input.bits.dividend := Mux(
+    rightshift,
+    abs.io.aOut >> 1,
+    abs.io.aOut << leftShiftWidthDividend(4, 0)
+  )
   srt.input.bits.divider := abs.io.bOut << leftShiftWidthDivisor
   srt.input.bits.counter := counter
   // if dividezero or biggerdivisor, bypass SRT
@@ -99,18 +111,37 @@ class SRT4Wrapper extends Module{
 
   // post-process for sign
   val quotientAbs = Wire(UInt(32.W))
-  val remainderAbs = Wire(UInt(32.W))
+  val remainderAbsFix = Wire(UInt(32.W))
+  val remainderAbsBias = Wire(UInt(32.W))
   quotientAbs := srt.output.bits.quotient
-  remainderAbs := srt.output.bits.reminder >> zeroHeadDivisorSRT
+  remainderAbsBias := srt.output.bits.reminder >> zeroHeadDivisorSRT(4, 0)
+  remainderAbsFix := Mux(remainderNeedFixSRT, remainderAbsBias + 1.U, remainderAbsBias)
+
   val dividendRestore = Wire(UInt(32.W))
-  dividendRestore := Mux(dividendSignReg, -dividendReg(31,0), dividendReg(31,0))
+  dividendRestore := Mux(dividendSignReg, -dividendReg(31, 0), dividendReg(31, 0))
 
   output.valid := srt.output.valid | bypassSRTReg
   // the quotient of division by zero has all bits set, and the remainder of division by zero equals the dividend.
-  output.bits.quotient := Mux(divideZeroReg,"hffffffff".U(32.W),
-    Mux(biggerdivisorReg, 0.U,
-      Mux(negativeSRT, -quotientAbs, quotientAbs))).asSInt
-  output.bits.reminder := Mux(divideZeroReg, dividendRestore,
-    Mux(biggerdivisorReg, dividendRestore,
-      Mux(dividendSignSRT, -remainderAbs, remainderAbs))).asSInt
+  output.bits.quotient := Mux(
+    divideZeroReg,
+    "hffffffff".U(32.W),
+    Mux(
+      biggerdivisorReg,
+      0.U,
+      Mux(
+        divisorIsOneReg,
+        Mux(divsorSignReg, -dividendRestore, dividendRestore),
+        Mux(negativeSRT, -quotientAbs, quotientAbs)
+      )
+    )
+  ).asSInt
+  output.bits.reminder := Mux(
+    divideZeroReg,
+    dividendRestore,
+    Mux(
+      biggerdivisorReg,
+      dividendRestore,
+      Mux(divisorIsOneReg, 0.U, Mux(dividendSignSRT, -remainderAbsFix, remainderAbsFix))
+    )
+  ).asSInt
 }
