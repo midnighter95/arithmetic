@@ -53,6 +53,7 @@ class QDS(rWidth: Int, ohWidth: Int, partialDividerWidth: Int, tables: Seq[Seq[I
 
   val columnSelect = input.partialDivider
   val adderWidth = rWidth + 1
+  /** 3 integer bits, 4 fractional bits*/
   val yTruncate: UInt = input.partialReminderCarry + input.partialReminderSum
   /** the selection constant vector */
   val mkVec = selectRom(columnSelect)

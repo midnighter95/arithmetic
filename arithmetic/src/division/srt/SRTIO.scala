@@ -21,7 +21,7 @@ class OTFInput(qWidth: Int, ohWidth: Int) extends Bundle {
   val quotientMinusOne = UInt(qWidth.W)
   val selectedQuotientOH = UInt(ohWidth.W)
 }
-
+/** if needcorrect*/
 class OTFOutput(qWidth: Int) extends Bundle {
   val quotient = UInt(qWidth.W)
   val quotientMinusOne = UInt(qWidth.W)
