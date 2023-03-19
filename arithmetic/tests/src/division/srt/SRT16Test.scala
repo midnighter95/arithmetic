@@ -42,7 +42,7 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
         val leftShiftWidthDividend: Int = zeroHeadDividend - guardWidth
         val leftShiftWidthDivider:  Int = zeroHeadDivider
 
-        println("leftShiftWidthDividend  = %d ".format(leftShiftWidthDividend))
+        //println("leftShiftWidthDividend  = %d ".format(leftShiftWidthDividend))
         // test
         testCircuit(
           new SRT16(n, n, n),
