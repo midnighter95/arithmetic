@@ -60,15 +60,15 @@ object SRT4Test extends TestSuite with ChiselUtestTester {
           for (a <- 1 to 1000 if !flag) {
             if (dut.output.valid.peek().litValue == 1) {
               flag = true
-              println("%x / %x = %x --- %x".format(dividend, divisor, quotient, remainder))
-              println(
-                "%x / %x = %x --- %x".format(
-                  dividend,
-                  divisor,
-                  dut.output.bits.quotient.peek().litValue,
-                  dut.output.bits.reminder.peek().litValue >> zeroHeaddivisor
-                )
-              )
+//              println("%x / %x = %x --- %x".format(dividend, divisor, quotient, remainder))
+//              println(
+//                "%x / %x = %x --- %x".format(
+//                  dividend,
+//                  divisor,
+//                  dut.output.bits.quotient.peek().litValue,
+//                  dut.output.bits.reminder.peek().litValue >> zeroHeaddivisor
+//                )
+//              )
               utest.assert(dut.output.bits.quotient.peek().litValue == quotient)
               utest.assert(dut.output.bits.reminder.peek().litValue >> zeroHeaddivisor == remainder)
             }

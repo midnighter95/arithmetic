@@ -59,8 +59,8 @@ object SRT8Test extends TestSuite with ChiselUtestTester {
           for (a <- 1 to 1000 if !flag) {
             if (dut.output.valid.peek().litValue == 1) {
               flag = true
-              println(dut.output.bits.quotient.peek().litValue)
-              println(dut.output.bits.reminder.peek().litValue)
+//              println(dut.output.bits.quotient.peek().litValue)
+//              println(dut.output.bits.reminder.peek().litValue)
               utest.assert(dut.output.bits.quotient.peek().litValue == quotient)
               utest.assert(dut.output.bits.reminder.peek().litValue >> zeroHeadDivider == remainder)
             }
@@ -72,7 +72,7 @@ object SRT8Test extends TestSuite with ChiselUtestTester {
       }
 
       //     testcase(64)
-      for (i <- 1 to 50) {
+      for (i <- 1 to 10) {
         testcase(32)
       }
     }

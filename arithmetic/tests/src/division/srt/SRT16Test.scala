@@ -9,17 +9,17 @@ import scala.util.Random
 object SRT16Test extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
     test("SRT16 should pass") {
-      def testcase(width: Int): Unit = {
+      def testcase(width: Int, init: Int, shift: Int): Unit = {
         // parameters
         val radixLog2: Int = 4
         val n:         Int = width
         val m:         Int = n - 1
         val p:         Int = Random.nextInt(m - radixLog2 + 1) //order to offer guardwidth
         val q:         Int = Random.nextInt(m - radixLog2 + 1)
-        val dividend:  BigInt = BigInt(p, Random)
-        val divider:   BigInt = BigInt(q, Random)
-//        val dividend: BigInt = 0x7fffffff
-//        val divider: BigInt = 16
+//        val dividend:  BigInt = BigInt(p, Random)
+//        val divider:   BigInt = BigInt(q, Random)
+        val dividend: BigInt = init
+        val divider:  BigInt = shift
         def zeroCheck(x: BigInt): Int = {
           var flag = false
           var a: Int = m
@@ -42,7 +42,7 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
         val leftShiftWidthDividend: Int = zeroHeadDividend - guardWidth
         val leftShiftWidthDivider:  Int = zeroHeadDivider
 
-//        println("leftShiftWidthDividend  = %d ".format(leftShiftWidthDividend))
+        println("leftShiftWidthDividend  = %d ".format(leftShiftWidthDividend))
         // test
         testCircuit(
           new SRT16(n, n, n),
@@ -61,8 +61,15 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
             if (dut.output.valid.peek().litValue == 1) {
               flag = true
 
-//                println(dut.output.bits.quotient.peek().litValue)
-//                println(dut.output.bits.reminder.peek().litValue)
+              println("%d / %d = %d --- %d".format(dividend, divider, quotient, remainder))
+              println(
+                "%d / %d = %d --- %d".format(
+                  dividend,
+                  divider,
+                  dut.output.bits.quotient.peek().litValue,
+                  dut.output.bits.reminder.peek().litValue >> zeroHeadDivider
+                )
+              )
               utest.assert(dut.output.bits.quotient.peek().litValue == quotient)
               utest.assert(dut.output.bits.reminder.peek().litValue >> zeroHeadDivider == remainder)
             }
@@ -74,9 +81,12 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
       }
 
       //     testcase(64)
-      for (i <- 1 to 10) {
-        testcase(32)
+      for (j <- 0 to 256) {
+        for (i <- 1 to 256) {
+          testcase(32, i, j)
+        }
       }
     }
+
   }
 }
