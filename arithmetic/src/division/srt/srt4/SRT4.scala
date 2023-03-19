@@ -34,7 +34,7 @@ class SRT4(
   dTruncateWidth: Int = 4,
   rTruncateWidth: Int = 4)
     extends Module {
-  val fixWidth = 2
+  val fixWidth = 1
   val divisorWidthFix = dividerWidth + fixWidth
 
   /** width for csa */
