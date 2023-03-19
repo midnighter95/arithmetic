@@ -18,8 +18,8 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
         val q:         Int = Random.nextInt(m - radixLog2 + 1)
 //        val dividend:  BigInt = BigInt(p, Random)
 //        val divider:   BigInt = BigInt(q, Random)
-        val dividend: BigInt = init
-        val divider:  BigInt = shift
+        val dividend: BigInt = 1227133513
+        val divider:  BigInt = 648422
         def zeroCheck(x: BigInt): Int = {
           var flag = false
           var a: Int = m
@@ -60,18 +60,29 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
           for (a <- 1 to 1000 if !flag) {
             if (dut.output.valid.peek().litValue == 1) {
               flag = true
-
-              println("%d / %d = %d --- %d".format(dividend, divider, quotient, remainder))
-              println(
-                "%d / %d = %d --- %d".format(
-                  dividend,
-                  divider,
-                  dut.output.bits.quotient.peek().litValue,
-                  dut.output.bits.reminder.peek().litValue >> zeroHeadDivider
+              def printvalue = {
+                println("%d / %d = %d --- %d".format(dividend, divider, quotient, remainder))
+                println(
+                  "%d / %d = %d --- %d".format(
+                    dividend,
+                    divider,
+                    dut.output.bits.quotient.peek().litValue,
+                    dut.output.bits.reminder.peek().litValue >> zeroHeadDivider
+                  )
                 )
-              )
-              utest.assert(dut.output.bits.quotient.peek().litValue == quotient)
-              utest.assert(dut.output.bits.reminder.peek().litValue >> zeroHeadDivider == remainder)
+              }
+
+              utest.assert(if (dut.output.bits.quotient.peek().litValue == quotient) {
+                true
+              } else {
+                printvalue
+                false
+              })
+              utest.assert(if (dut.output.bits.reminder.peek().litValue >> zeroHeadDivider == remainder) { true }
+              else {
+                printvalue
+                false
+              })
             }
             dut.clock.step()
           }
