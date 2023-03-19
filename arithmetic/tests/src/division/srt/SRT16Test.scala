@@ -18,8 +18,8 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
         val q:         Int = Random.nextInt(m - radixLog2 + 1)
 //        val dividend:  BigInt = BigInt(p, Random)
 //        val divider:   BigInt = BigInt(q, Random)
-        val dividend: BigInt = 1227133513
-        val divider:  BigInt = 648422
+        val dividend: BigInt = init
+        val divider:  BigInt = shift
         def zeroCheck(x: BigInt): Int = {
           var flag = false
           var a: Int = m
@@ -92,9 +92,9 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
       }
 
       //     testcase(64)
-      for (j <- 0 to 256) {
-        for (i <- 1 to 256) {
-          testcase(32, i, j)
+      for (i <- 2 to 255) {
+        for (j <- 1 to   i-1) {
+          testcase(8, i, j)
         }
       }
     }
