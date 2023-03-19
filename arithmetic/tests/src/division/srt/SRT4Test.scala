@@ -68,9 +68,9 @@ object SRT4Test extends TestSuite with ChiselUtestTester {
                 println(
                   "%d / %d = %d --- %d".format(
                     dividend,
-                    divider,
+                    divisor,
                     dut.output.bits.quotient.peek().litValue,
-                    dut.output.bits.reminder.peek().litValue >> zeroHeadDivisor
+                    dut.output.bits.reminder.peek().litValue >> zeroHeaddivisor
                   )
                 )
               }
