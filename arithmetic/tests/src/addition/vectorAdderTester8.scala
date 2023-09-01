@@ -12,7 +12,7 @@ object vectorAdderTester8 extends TestSuite with ChiselUtestTester {
 
         val a:Seq[Int] = Seq(Random.nextInt(255),Random.nextInt(255),Random.nextInt(255),Random.nextInt(255))
         val b:Seq[Int] = Seq(Random.nextInt(255),Random.nextInt(255),Random.nextInt(255),Random.nextInt(255))
-        val c:Seq[Int] = Seq(Random.nextInt(1),Random.nextInt(1),Random.nextInt(1),Random.nextInt(1))
+        val c:Seq[Int] = Seq(Random.nextInt(2),Random.nextInt(2),Random.nextInt(2),Random.nextInt(2))
 
         def toHex(a:Int)={
             if(a>15) a.toHexString else "0"+a.toHexString
@@ -37,7 +37,7 @@ object vectorAdderTester8 extends TestSuite with ChiselUtestTester {
         val bInput = toCircuit(b)
         val cInput = "b"+c.map(_.toString).mkString
         val z_expect = toCircuit(z_expectSeq)
-        val ov_expect = "b"+c.map(_.toString).mkString("")
+        val ov_expect = "b"+overflow.map(_.toString).mkString("")
 
         // test
         testCircuit(
@@ -67,7 +67,7 @@ object vectorAdderTester8 extends TestSuite with ChiselUtestTester {
       }
 
 
-            for (i <- 1 to 20) {
+            for (i <- 1 to 50) {
               testcase(32)
             }
 
