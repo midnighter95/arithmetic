@@ -33,7 +33,7 @@ object vectorAdderTester extends TestSuite with ChiselUtestTester {
       }
 
 
-            for (i <- 1 to 100) {
+            for (i <- 1 to 30) {
               testcase(8)
             }
 

@@ -45,22 +45,23 @@ class vectorAdder(val width: Int) extends Module{
       val s7 = prefixadd(layer1(0), layer1(1))
       Seq(s0, s1, s2, s3, s4, s5, s6, s7)
     }
-
   }
+  def treeToResult(tree:Seq[(Bool, Bool)], pg: Seq[(Bool, Bool)], cin: Bool): UInt = {
+    val cs =  cin +: tree.map(pg => cgen(pg, cin))
+    val ps = pairs.map(_._1) :+ false.B
+    val sum = ps.zip(cs).map { case (p, c) => p ^ c }
+    val reuslt = VecInit(sum).asUInt
+    reuslt
+  }
+
   val pairs: Seq[(Bool, Bool)] = zeroLayer(as, bs)
-
   val tree = bk8(pairs)
-  val cs =  cin +: tree.map(pg => cgen(pg, cin))
 
-  val ps = pairs.map(_._1) :+ false.B
-  val psVec = VecInit(ps).asUInt
-  val sum = ps.zip(cs).map { case (p, c) => p ^ c }
+  val result = Wire(UInt(9.W))
+  result := treeToResult(tree,pairs,cin)
 
-  val reuslt = Wire(UInt(9.W))
-  reuslt := VecInit(sum).asUInt
-  z := reuslt
-
-  cout := reuslt(8)
+  cout := result(8)
+  z := result
   assert(a +& b + cin === Cat(cout, z))
   
 
