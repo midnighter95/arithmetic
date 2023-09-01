@@ -56,8 +56,32 @@ class vectorAdder(val width: Int) extends Module{
   }
 
   val pairs: Seq[(Bool, Bool)] = zeroLayer(as, bs)
-  val paire8: Seq[Seq[(Bool, Bool)]] = Seq(pairs.slice(0,8), pairs.slice(8,16), pairs.slice(16,24), pairs.slice(24,32))
-  val tree8 = bk8(pairs.slice(0,8)) ++ bk8(pairs.slice(8,16))++ bk8(pairs.slice(16,24))++ bk8(pairs.slice(24,32))
+  val tree8Leaf0 = bk8(pairs.slice(0,8))
+  val tree8Leaf1 = bk8(pairs.slice(8,16))
+  val tree8Leaf2 = bk8(pairs.slice(16,24))
+  val tree8Leaf3 = bk8(pairs.slice(24,32))
+  val tree8: Seq[(Bool, Bool)] = tree8Leaf0 ++ tree8Leaf1 ++ tree8Leaf2 ++ tree8Leaf3
+  val tree16: Seq[(Bool, Bool)] = tree8Leaf0 ++ tree8Leaf1.map(prefixadd(_, tree8Leaf0(7))) ++ tree8Leaf2 ++ tree8Leaf3.map(prefixadd(_, tree8Leaf2(7)))
+
+  val tree8P = VecInit(tree8.map(_._1)).asUInt
+  val tree8G = VecInit(tree8.map(_._2)).asUInt
+  val tree16P = VecInit(tree16.map(_._1)).asUInt
+  val tree16G = VecInit(tree16.map(_._2)).asUInt
+  val tree32P = VecInit(tree16.map(_._1)).asUInt
+  val tree32G = VecInit(tree16.map(_._2)).asUInt
+
+  val treeRestoreP = Mux1H(Seq(
+    sew(0)-> tree8P,
+    sew(1)-> tree16P,
+    sew(2)-> tree32P
+  ))
+
+  val treeRestoreG = Mux1H(Seq(
+    sew(0) -> tree8G,
+    sew(1) -> tree16G,
+    sew(2) -> tree32G
+  ))
+  val treeRestore = treeRestoreP.asBools.zip(treeRestoreG.asBools)
 
   def buildCarry(tree: Seq[(Bool, Bool)], pg:Seq[(Bool, Bool)], cin: UInt): UInt ={
     val ci0 = VecInit(tree.slice(0,8).map(pg => cgen(pg, cin(0)))).asUInt
@@ -67,20 +91,29 @@ class vectorAdder(val width: Int) extends Module{
     Cat(ci3,ci2,ci1,ci0)
   }
 
-  val carry = buildCarry(tree8, pairs, cin)
+  val carry = buildCarry(treeRestore, pairs, cin)
   val cout8 = carry(31) ## carry(23) ## carry(15) ## carry(7)
+  val cout16 = carry(31) ## carry(15)
+  val cout32 = carry(31)
   val ps = VecInit(pairs.map(_._1)).asUInt
-  val carrySele = cin
-  val cs = Cat(carry(30,24), carrySele(3),
+  val carrySele = Mux1H(Seq(
+    sew(0)-> cin,
+    sew(1)-> carry(23)##cin(2)##carry(7)##cin(0),
+    sew(2)-> cin,
+  ))
+  val cs = Cat(carry(30,24),  carrySele(3),
                carry(22, 16), carrySele(2),
                carry(14, 8),  carrySele(1),
                carry(6,0),    carrySele(0))
-  cout := cout8
+  cout := Mux1H(Seq(
+    sew(0) -> cout8,
+    sew(1) -> cout16,
+    sew(2) -> cout32,
+  ))
   dontTouch(carry)
   dontTouch(ps)
+  dontTouch(cout16)
 
-
-  cout := 0.U
   z := ps ^ cs
 
 }
