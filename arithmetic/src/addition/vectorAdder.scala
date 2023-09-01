@@ -3,14 +3,22 @@ package addition
 import chisel3._
 import chisel3.util._
 
+/**
+  * sew = 8: Input.sew = 001, cin = c3,c2,c1,c0
+  * sew = 16 Input.sew = 010, cin = c_high,c_high,c_low,c_low
+  * sew = 32 Input.sew = 010, cin = cin,cin,cin,cin
+  *
+  *
+  */
 class vectorAdder(val width: Int) extends Module{
   require(width > 0)
   val a: UInt = IO(Input(UInt(width.W)))
   val b: UInt = IO(Input(UInt(width.W)))
   val z: UInt = IO(Output(UInt(width.W)))
+  val sew = IO(Input(UInt(3.W)))
 
-  val cin: Bool = IO(Input(Bool()))
-  val cout: Bool = IO(Output(Bool()))
+  val cin  = IO(Input(UInt(4.W)))
+  val cout = IO(Output(UInt(4.W)))
 
 
 
@@ -46,24 +54,34 @@ class vectorAdder(val width: Int) extends Module{
       Seq(s0, s1, s2, s3, s4, s5, s6, s7)
     }
   }
-  def treeToResult(tree:Seq[(Bool, Bool)], pg: Seq[(Bool, Bool)], cin: Bool): UInt = {
-    val cs =  cin +: tree.map(pg => cgen(pg, cin))
-    val ps = pairs.map(_._1) :+ false.B
-    val sum = ps.zip(cs).map { case (p, c) => p ^ c }
-    val reuslt = VecInit(sum).asUInt
-    reuslt
-  }
 
   val pairs: Seq[(Bool, Bool)] = zeroLayer(as, bs)
-  val tree = bk8(pairs)
+  val paire8: Seq[Seq[(Bool, Bool)]] = Seq(pairs.slice(0,8), pairs.slice(8,16), pairs.slice(16,24), pairs.slice(24,32))
+  val tree8 = bk8(pairs.slice(0,8)) ++ bk8(pairs.slice(8,16))++ bk8(pairs.slice(16,24))++ bk8(pairs.slice(24,32))
 
-  val result = Wire(UInt(9.W))
-  result := treeToResult(tree,pairs,cin)
+  def buildCarry(tree: Seq[(Bool, Bool)], pg:Seq[(Bool, Bool)], cin: UInt): UInt ={
+    val ci0 = VecInit(tree.slice(0,8).map(pg => cgen(pg, cin(0)))).asUInt
+    val ci1 = VecInit(tree.slice(8,16).map(pg => cgen(pg, cin(1)))).asUInt
+    val ci2 = VecInit(tree.slice(16,24).map(pg => cgen(pg, cin(2)))).asUInt
+    val ci3 = VecInit(tree.slice(24,32).map(pg => cgen(pg, cin(3)))).asUInt
+    Cat(ci3,ci2,ci1,ci0)
+  }
 
-  cout := result(8)
-  z := result
-  assert(a +& b + cin === Cat(cout, z))
-  
+  val carry = buildCarry(tree8, pairs, cin)
+  val cout8 = carry(31) ## carry(23) ## carry(15) ## carry(7)
+  val ps = VecInit(pairs.map(_._1)).asUInt
+  val carrySele = cin
+  val cs = Cat(carry(30,24), carrySele(3),
+               carry(22, 16), carrySele(2),
+               carry(14, 8),  carrySele(1),
+               carry(6,0),    carrySele(0))
+  cout := cout8
+  dontTouch(carry)
+  dontTouch(ps)
+
+
+  cout := 0.U
+  z := ps ^ cs
 
 }
 
