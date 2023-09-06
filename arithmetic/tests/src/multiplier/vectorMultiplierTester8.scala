@@ -11,15 +11,31 @@ object vectorMultiplierTester8 extends TestSuite with ChiselUtestTester {
     test("VectorMultiplier8 should pass") {
       def testcase(width: Int): Unit = {
 
-        val a = "b1011110"
-        val b = "b1011110"
+        val n = 2 ^ 8 - 1
 
-        val aInput = "b1011110"
-        val bInput = "b1011110"
+//        val a: Int = Random.nextInt(n) * (if(Random.nextInt(2)==0) -1 else 1)
+//        val b = Random.nextInt(n) * (if(Random.nextInt(2)==0) -1 else 1)
+        val a: Int = Random.nextInt(n)
+        val b      = Random.nextInt(n)
+
+        val z = a * b
+
+        def complementNine(x : Int) = {
+          if(x>=0){
+            "b" + x.toBinaryString
+          } else{
+            val comple = 2^9 + x
+            "b" + comple.toBinaryString
+          }
+        }
+
+        val aInput = complementNine(a)
+        val bInput = complementNine(b)
+        val z_expect = complementNine(z)
 
         // test
         testCircuit(
-          new VectorMultiplier,
+          new VectorMultiplier(width),
           Seq(chiseltest.internal.NoThreadingAnnotation, chiseltest.simulator.WriteVcdAnnotation)
         ) { dut: VectorMultiplier =>
           //          println("a = " + a)
@@ -35,15 +51,15 @@ object vectorMultiplierTester8 extends TestSuite with ChiselUtestTester {
           dut.a.poke(aInput.U)
           dut.b.poke(bInput.U)
           dut.clock.step(1)
-          dut.z.expect(0.U)
+          dut.z.expect(z_expect.U)
 
 
         }
       }
 
 
-      for (i <- 1 to 2) {
-        testcase(8)
+      for (i <- 1 to 50) {
+        testcase(9)
       }
 
     }
