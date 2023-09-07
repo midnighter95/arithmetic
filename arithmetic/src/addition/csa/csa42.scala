@@ -37,3 +37,15 @@ class csa42(width: Int) extends Module{
 
   result := out(1) +& (out(0)<<1.U).asUInt
 }
+
+object csa42 {
+  def apply(
+             width:     Int,
+           )(in:         Vec[UInt]
+           ): (UInt, UInt) = {
+    val csa42 = Module(new csa42(width))
+    // This need synthesis tool to do constant propagation
+    csa42.in := in
+    (csa42.out(0), csa42.out(1))
+  }
+}
