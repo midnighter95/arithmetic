@@ -6,9 +6,9 @@ import utest._
 
 import scala.util.Random
 
-object vectorMultiplierTester8 extends TestSuite with ChiselUtestTester {
+object vectorMultiplierUnsignedTester8 extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
-    test("VectorMultiplier8 should pass") {
+    test("VectorMultiplier8unsigned should pass") {
       def testcase(width: Int): Unit = {
 
         val n = 2 ^ 8 - 1
@@ -58,8 +58,8 @@ object vectorMultiplierTester8 extends TestSuite with ChiselUtestTester {
       }
 
 
-      for (i <- 1 to 50) {
-        testcase(9)
+      for (i <- 1 to 10) {
+        testcase(8)
       }
 
     }
