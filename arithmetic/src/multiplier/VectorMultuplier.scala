@@ -23,21 +23,20 @@ class VectorMultiplier(width: Int) extends Module {
   val bIn = Mux(sign, extend(b,Width), extend(b, Width,false))
 
 
-  val recMultiplerVec: Vec[SInt] = Booth
-    .recode(Width)(radixLog2, signed = true)(aIn.asUInt)
-
-  // produce Seq(b, 2 * b, ..., 2^digits * b), output width = width + radixLog2 - 1
-  val bMultipleWidth = (Width - 1).W
+  val recMultiplerVec: Vec[SInt] = VecBooth
+    .recode(Width)(radixLog2, signed = true)(Cat(aIn,0.U(1.W)).asUInt)
 
   /** */
   val encodedWidth = (radixLog2 + 1).W
-  /** do b * recode a */
+  /** do b * recode a (don't shift)
+    * output is 10bits
+    * */
   val partialProductLookupTable: Seq[(UInt, Bits)] = Seq(
-      0.U(3.W)                    -> 0.U(Width.W),
-      (-1).S(encodedWidth).asUInt -> ~extend(bIn(Width - 1, 0), Width+1),
-      (-2).S(encodedWidth).asUInt -> ~(bIn(Width - 1, 0) << 1),
-      1.S(encodedWidth).asUInt    -> extend(bIn(Width - 1, 0), Width+1),
-      2.S(encodedWidth).asUInt    -> (bIn(Width - 1, 0) << 1)
+      0.U(3.W)                    -> 0.U(10.W),
+      (-1).S(encodedWidth).asUInt -> ~extend(bIn(8, 0), 10),
+      (-2).S(encodedWidth).asUInt -> ~(bIn(8, 0) << 1),
+      1.S(encodedWidth).asUInt    -> extend(bIn(Width - 1, 0), 10),
+      2.S(encodedWidth).asUInt    -> (bIn(8, 0) << 1)
   )
 
   /**
@@ -48,7 +47,7 @@ class VectorMultiplier(width: Int) extends Module {
     *
     * */
   def make10BitsPartialProduct(weight: Int, recoded: SInt): (Bool, UInt, Bool) = { // Seq[(weight, value)]
-    val partialProductOrigin: UInt = MuxLookup(recoded.asUInt, 0.U(bMultipleWidth), partialProductLookupTable).asUInt
+    val partialProductOrigin: UInt = MuxLookup(recoded.asUInt, 0.U(10.W), partialProductLookupTable).asUInt
     val doShift = weight match {
       case 0 => partialProductOrigin(8,0)
       case c => Cat(partialProductOrigin(8,0),0.U((2*c).W))
