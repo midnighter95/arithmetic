@@ -10,28 +10,25 @@ object vectorMultiplierUnsignedTester8 extends TestSuite with ChiselUtestTester 
   def tests: Tests = Tests {
     test("VectorMultiplier8unsigned should pass") {
       def testcase(width: Int): Unit = {
+        def getCircuitValue(x: Int, width: Int) = {
+          val complement = if (x >= 0) {
+            x
+          } else {
+            if (width == 8) 256 + x
+            else 65536 + x
+          }
+          "b" + Seq.fill(width - complement.toBinaryString.length)("0").mkString("") + complement.toBinaryString
+        }
 
         val n = 2 ^ 8 - 1
 
-//        val a: Int = Random.nextInt(n) * (if(Random.nextInt(2)==0) -1 else 1)
-//        val b = Random.nextInt(n) * (if(Random.nextInt(2)==0) -1 else 1)
         val a: Int = Random.nextInt(n)
         val b      = Random.nextInt(n)
-
         val z = a * b
 
-        def complementNine(x : Int) = {
-          if(x>=0){
-            "b" + x.toBinaryString
-          } else{
-            val comple = 2^9 + x
-            "b" + comple.toBinaryString
-          }
-        }
-
-        val aInput = complementNine(a)
-        val bInput = complementNine(b)
-        val z_expect = complementNine(z)
+        val aInput = getCircuitValue(a, 8)
+        val bInput = getCircuitValue(b, 8)
+        val z_expect = getCircuitValue(z,16)
 
         // test
         testCircuit(
