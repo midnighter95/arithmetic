@@ -37,13 +37,13 @@ object M32S32Tester extends TestSuite with ChiselUtestTester {
           new VectorMultiplier32,
           Seq(chiseltest.internal.NoThreadingAnnotation, chiseltest.simulator.WriteVcdAnnotation)
         ) { dut: VectorMultiplier32 =>
-                    println("a = " + a)
-                    println("aInput=" + aInput)
-                    println("b = " + b)
-                    println("bInput=" + bInput)
-
-                    println("z_expect = " + z)
-                    println("z_expectUInt = " + z_expect)
+//                    println("a = " + a)
+//                    println("aInput=" + aInput)
+//                    println("b = " + b)
+//                    println("bInput=" + bInput)
+//
+//                    println("z_expect = " + z)
+//                    println("z_expectUInt = " + z_expect)
 
           dut.clock.setTimeout(0)
           dut.a.poke(aInput.U)

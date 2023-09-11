@@ -1,6 +1,7 @@
 package multiplier
 
 import addition.prefixadder.common.BrentKungSum
+import addition.csa._
 import chisel3._
 import chisel3.util._
 
@@ -40,9 +41,9 @@ class Multiplier16 extends Module{
 
   /** output effect width = 16 */
   def compress82(in: Seq[UInt]): (UInt, UInt) = {
-    val layer0 = addition.csa.csa42(12)(VecInit(in.dropRight(4)))
-    val layer1 = addition.csa.csa42(12)(VecInit(in(4)(11, 4), in(5)(12, 4), in(6)(13, 4), in(7)(14, 4)))
-    val layerOut = addition.csa.csa42(16)(VecInit(layer0._1 << 1, layer0._2, layer1._1 << 5, layer1._2 << 4))
+    val layer0 = csa42(12)(VecInit(in.dropRight(4)))
+    val layer1 = csa42(12)(VecInit(in(4)(11, 4), in(5)(12, 4), in(6)(13, 4), in(7)(14, 4)))
+    val layerOut = csa42(16)(VecInit(layer0._1 << 1, layer0._2, layer1._1 << 5, layer1._2 << 4))
     ((layerOut._1(14, 0) << 1).asUInt, layerOut._2(15, 0))
   }
 
@@ -61,13 +62,13 @@ class Multiplier16 extends Module{
   val ax00result = addition.prefixadder.apply(BrentKungSum)(ax00._1(15,0) , ax00._2(15,0), false.B)
   val ax11result = addition.prefixadder.apply(BrentKungSum)(ax11._1(15,0) , ax11._2(15,0), false.B)
 
-  val merge = addition.csa.csa42(16)(
+  val merge = csa42(16)(
     VecInit(
       ax10._1,
       ax10._2,
       ax01._1,
       ax01._2))
-  val result16 = addition.csa.csa42(32)(
+  val result16 = csa42(32)(
     VecInit(
       ax00result,
       merge._1<<9,

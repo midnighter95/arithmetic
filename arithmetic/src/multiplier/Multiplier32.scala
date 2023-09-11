@@ -1,9 +1,9 @@
 package multiplier
 
-import addition.prefixadder.common.BrentKungSum
 import chisel3._
 import chisel3.util._
-
+import addition.prefixadder.common.BrentKungSum
+import addition.csa._
 
 class Multiplier32 extends Module{
   val a = IO(Input(UInt(32.W)))
@@ -39,31 +39,31 @@ class Multiplier32 extends Module{
 
   /** output effect width = 32 */
   def compress16_2(in: Seq[UInt]): (UInt, UInt) = {
-    val layer00 = addition.csa.csa42(20)(VecInit(in.dropRight(12)))
+    val layer00 = csa42(20)(VecInit(in.dropRight(12)))
     /** 4 */
-    val layer01 = addition.csa.csa42(20)(VecInit(in(4)>>4,  in(5)>>4,  in(6)>>4,  in(7)>>4))
+    val layer01 = csa42(20)(VecInit(in(4)>>4,  in(5)>>4,  in(6)>>4,  in(7)>>4))
     /** 8 */
-    val layer02 = addition.csa.csa42(20)(VecInit(in(8)>>8,  in(9)>>8,  in(10)>>8, in(11)>>8))
+    val layer02 = csa42(20)(VecInit(in(8)>>8,  in(9)>>8,  in(10)>>8, in(11)>>8))
     /** 12 */
-    val layer03 = addition.csa.csa42(20)(VecInit(in(12)>>12, in(13)>>12, in(14)>>12, in(15)>>12))
+    val layer03 = csa42(20)(VecInit(in(12)>>12, in(13)>>12, in(14)>>12, in(15)>>12))
     /** 0 */
-    val layer10 = addition.csa.csa42(24)(VecInit(layer00._1 << 1, layer00._2, layer01._1 << 5, layer01._2 << 4))
-    val layer11 = addition.csa.csa42(24)(VecInit(layer02._1 << 1, layer02._2, layer03._1 << 5, layer03._2 << 4))
-    val layer2  = addition.csa.csa42(32)(VecInit(layer10._1 << 1, layer10._2, layer11._1 << 9, layer11._2 << 8))
+    val layer10 = csa42(24)(VecInit(layer00._1 << 1, layer00._2, layer01._1 << 5, layer01._2 << 4))
+    val layer11 = csa42(24)(VecInit(layer02._1 << 1, layer02._2, layer03._1 << 5, layer03._2 << 4))
+    val layer2  = csa42(32)(VecInit(layer10._1 << 1, layer10._2, layer11._1 << 9, layer11._2 << 8))
     ((layer2._1(31, 0) << 1).asUInt, layer2._2(31, 0))
   }
 
   val ax01 = compress16_2(a0x1)
   val ax10 = compress16_2(a1x0)
 
-  val merge = addition.csa.csa42(32)(
+  val merge = csa42(32)(
     VecInit(
       ax10._1,
       ax10._2,
       ax01._1,
       ax01._2))
 
-  val result32 = addition.csa.csa42(64)(
+  val result32 = csa42(64)(
     VecInit(
       result00,
       (merge._1 << 17).asUInt,
