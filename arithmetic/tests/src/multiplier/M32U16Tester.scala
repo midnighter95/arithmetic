@@ -41,9 +41,9 @@ object M32U16Tester extends TestSuite with ChiselUtestTester {
 
         // test
         testCircuit(
-          new Multiplier32,
+          new VectorMultiplier32,
           Seq(chiseltest.internal.NoThreadingAnnotation, chiseltest.simulator.WriteVcdAnnotation)
-        ) { dut: Multiplier32 =>
+        ) { dut: VectorMultiplier32 =>
           //          println("a = " + a)
           //          println("aInput=" + aInput)
           //          println("b = " + b)
@@ -55,6 +55,7 @@ object M32U16Tester extends TestSuite with ChiselUtestTester {
           dut.clock.setTimeout(0)
           dut.a.poke(aInput.U)
           dut.b.poke(bInput.U)
+          dut.unsign.poke(true.B)
           dut.sew.poke("b010".U)
           dut.clock.step(1)
           dut.z.expect(z_expect.U)
