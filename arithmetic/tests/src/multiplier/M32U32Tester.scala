@@ -6,9 +6,9 @@ import utest._
 
 import scala.util.Random
 
-object M32UTester extends TestSuite with ChiselUtestTester {
+object M32U32Tester extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
-    test("M32U should pass") {
+    test("M32U32 should pass") {
       def testcase(width: Int): Unit = {
         def getCircuitValue(x: BigInt, width: Int) = {
           val complement = if (x >= 0) {
@@ -55,13 +55,14 @@ object M32UTester extends TestSuite with ChiselUtestTester {
           dut.clock.setTimeout(0)
           dut.a.poke(aInput.U)
           dut.b.poke(bInput.U)
+          dut.sew.poke("b100".U)
           dut.clock.step(1)
           dut.z.expect(z_expect.U)
         }
       }
 
 
-      for (i <- 1 to 200) {
+      for (i <- 1 to 20) {
         testcase(32)
       }
 

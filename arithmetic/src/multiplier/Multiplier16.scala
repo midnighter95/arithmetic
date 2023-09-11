@@ -10,6 +10,9 @@ class Multiplier16 extends Module{
   val z = IO(Output(UInt(32.W)))
   val sew = IO(Input(UInt(2.W)))
 
+  val a0Vec = a(7, 0).asBools
+  val a1Vec = a(15, 8).asBools
+
   def make8BitsPartialProduct(a : Tuple2[Bool, Int], in:UInt): UInt = { // Seq[(weight, value)]
     val exist = Mux(a._1, in, 0.U(8.W))
     val doShift = a._2 match {
@@ -19,8 +22,6 @@ class Multiplier16 extends Module{
     doShift
   }
 
-  val a0Vec = a(7,0).asBools
-  val a1Vec = a(15,8).asBools
   val a0x0: Seq[UInt] = a0Vec.zipWithIndex.map {
     case (a,i) => make8BitsPartialProduct((a,i),b(7,0))
   }
@@ -36,7 +37,6 @@ class Multiplier16 extends Module{
   val a1x1: Seq[UInt] = a1Vec.zipWithIndex.map {
     case (a, i) => make8BitsPartialProduct((a, i), b(15, 8))
   }
-
 
   /** output effect width = 16 */
   def compress82(in: Seq[UInt]): (UInt, UInt) = {
@@ -61,7 +61,6 @@ class Multiplier16 extends Module{
   val ax00result = addition.prefixadder.apply(BrentKungSum)(ax00._1(15,0) , ax00._2(15,0), false.B)
   val ax11result = addition.prefixadder.apply(BrentKungSum)(ax11._1(15,0) , ax11._2(15,0), false.B)
 
-  //
   val merge = addition.csa.csa42(16)(
     VecInit(
       ax10._1,
@@ -76,20 +75,19 @@ class Multiplier16 extends Module{
       ax11result<<16))
   val output16 = addition.prefixadder.apply(BrentKungSum)((result16._1<<1)(31,0).asUInt, result16._2(31,0))
 
-  val output8 = ax11result ## ax00result
+  val output8 = ax11result(15,0) ## ax00result(15,0)
 
   z := Mux(sew(0), output8, output16)
-
 }
 
 object Multiplier16 {
   def apply(a: UInt,
-             b: UInt) = {
+             b: UInt, sew:UInt) = {
     val mul16 = Module(new Multiplier16)
     // This need synthesis tool to do constant propagation
     mul16.a := a
     mul16.b := b
-    mul16.sew := 2.U
+    mul16.sew := sew
     mul16.z
   }
 }

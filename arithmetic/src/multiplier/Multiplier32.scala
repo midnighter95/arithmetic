@@ -9,12 +9,15 @@ class Multiplier32 extends Module{
   val a = IO(Input(UInt(32.W)))
   val b = IO(Input(UInt(32.W)))
   val z = IO(Output(UInt(64.W)))
+  val sew = IO(Input(UInt(3.W)))
 
+  val a0Vec = a(15, 0).asBools
+  val a1Vec = a(31, 16).asBools
 
-  val result00 = Multiplier16(a(15,0), b(15,0))
+  val sewFor16 = Mux(sew(0), 1.U(2.W), 2.U(2.W))
+  val result00 = Multiplier16(a(15,0), b(15,0), sewFor16)
   /** shift 32 */
-  val result11 = Multiplier16(a(31,16),b(31,16))
-
+  val result11 = Multiplier16(a(31,16),b(31,16), sewFor16)
 
   def make16BitsPartialProduct(a: Tuple2[Bool, Int], in: UInt): UInt = { // Seq[(weight, value)]
     val exist = Mux(a._1, in, 0.U(16.W))
@@ -24,10 +27,6 @@ class Multiplier32 extends Module{
     }
     doShift
   }
-
-  val a0Vec = a(15, 0).asBools
-  val a1Vec = a(31, 16).asBools
-
 
   /** shift 16 */
   val a1x0: Seq[UInt] = a1Vec.zipWithIndex.map {
@@ -57,7 +56,6 @@ class Multiplier32 extends Module{
   val ax01 = compress16_2(a0x1)
   val ax10 = compress16_2(a1x0)
 
-
   val merge = addition.csa.csa42(32)(
     VecInit(
       ax10._1,
@@ -72,7 +70,7 @@ class Multiplier32 extends Module{
       (merge._2 << 16).asUInt,
       result11 << 32))
   val output32 = addition.prefixadder.apply(BrentKungSum)((result32._1 << 1).asUInt(63,0), result32._2(63,0))
+  val output8And16 = result11 ## result00
 
-  z := output32
-
+  z := Mux(sew(2), output32, output8And16)
 }
