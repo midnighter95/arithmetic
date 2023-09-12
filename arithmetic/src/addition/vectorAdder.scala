@@ -33,20 +33,11 @@ class vectorAdder(val width: Int) extends Module {
   val b: UInt = IO(Input(UInt(width.W)))
   val z: UInt = IO(Output(UInt(width.W)))
   val sew = IO(Input(UInt(3.W)))
-  
-  val s0: Int = 7
-  val s1: Int = 15
-  val s2: Int = 23
-  val s3: Int = 31
 
-  val e0 = s0+1
-  val e1 = s1+1
-  val e2 = s2+1
-  val e3 = s3+1
   
-  val eSeq = Seq(0,8,16,24)
   val indexSeq = Seq(0,1,2,3)
-  
+  val e = indexSeq.map(i => i * 8)
+  val s = Seq(7,15,23,31)
 
   val cin = IO(Input(UInt(4.W)))
   val cout = IO(Output(UInt(4.W)))
@@ -63,32 +54,32 @@ class vectorAdder(val width: Int) extends Module {
 
   def bk8(leaf: Seq[(Bool, Bool)]): Seq[(Bool, Bool)] = leaf match {
     /** match to 8 bits fan-in */
-    case Seq((p0, g0), (p1, g1), (p2, g2), (p3, g3), (p4, g4), (p5, g5), (p6, g6), (ps0, gs0)) => {
-      val layer0 = Seq(prefixadd((ps0, gs0), (p6, g6)), prefixadd((p5, g5), (p4, g4)), prefixadd((p3, g3), (p2, g2)), prefixadd((p1, g1), (p0, g0)))
+    case Seq((p0, g0), (p1, g1), (p2, g2), (p3, g3), (p4, g4), (p5, g5), (p6, g6), (p7, g7)) => {
+      val layer0 = Seq(prefixadd((p7, g7), (p6, g6)), prefixadd((p5, g5), (p4, g4)), prefixadd((p3, g3), (p2, g2)), prefixadd((p1, g1), (p0, g0)))
       val layer1 = Seq(prefixadd(layer0(0), layer0(1)), prefixadd(layer0(2), layer0(3)))
 
-      val s0 = (p0, g0)
-      val s1 = layer0(3)
-      val s2 = prefixadd((p2, g2), s1)
-      val s3 = layer1(1)
-      val s4 = prefixadd((p4, g4), s3)
-      val s5 = prefixadd(layer0(1), layer1(1))
-      val s6 = prefixadd((p6, g6), s5)
-      val ss0 = prefixadd(layer1(0), layer1(1))
-      Seq(s0, s1, s2, s3, s4, s5, s6, ss0)
+      val t0 = (p0, g0)
+      val t1 = layer0(3)
+      val t2 = prefixadd((p2, g2), t1)
+      val t3 = layer1(1)
+      val t4 = prefixadd((p4, g4), t3)
+      val t5 = prefixadd(layer0(1), layer1(1))
+      val t6 = prefixadd((p6, g6), t5)
+      val t7 = prefixadd(layer1(0), layer1(1))
+      Seq(t0, t1, t2, t3, t4, t5, t6, t7)
     }
   }
 
   val pairs: Seq[(Bool, Bool)] = zeroLayer(as, bs)
 
-  val tree8Leaf = eSeq.map{
+  val tree8Leaf = e.map{
     case i => bk8(pairs.slice(i , i+8))
   }
   val tree8: Seq[(Bool, Bool)] = tree8Leaf.fold(Nil)(_++_)
   val tree16Leaf0 = tree8Leaf(0) ++ tree8Leaf(1).map(prefixadd(_, tree8Leaf(0)(7)))
   val tree16Leaf1 = tree8Leaf(2) ++ tree8Leaf(3).map(prefixadd(_, tree8Leaf(2)(7)))
   val tree16: Seq[(Bool, Bool)] = tree16Leaf0 ++ tree16Leaf1
-  val tree32 = tree16Leaf0 ++ tree16Leaf1.map(prefixadd(_, tree16Leaf0(s1)))
+  val tree32 = tree16Leaf0 ++ tree16Leaf1.map(prefixadd(_, tree16Leaf0(15)))
 
   val tree8P  = VecInit(tree8.map(_._1)).asUInt
   val tree8G  = VecInit(tree8.map(_._2)).asUInt
@@ -115,7 +106,7 @@ class vectorAdder(val width: Int) extends Module {
     * It's why 16sew input cin should be xxyy instead of 0x0y.
     */
   def buildCarry(tree: Seq[(Bool, Bool)], cin: UInt): UInt = {
-    val cbank = eSeq.zip(indexSeq).map{
+    val cbank = e.zip(indexSeq).map{
       case (e,i) => VecInit(tree.slice(e , e+8).map(pg => cgen(pg, cin(i)))).asUInt
     }
     Cat(cbank(3), cbank(2), cbank(1), cbank(0))
@@ -123,9 +114,9 @@ class vectorAdder(val width: Int) extends Module {
 
   /** if carry generated in each bit , in order */
   val carryResult = buildCarry(tree, cin)
-  val cout8  = carryResult(s3) ## carryResult(s2) ## carryResult(s1) ## carryResult(s0)
-  val cout16 = carryResult(s3) ## carryResult(s1)
-  val cout32 = carryResult(s3)
+  val cout8  = carryResult(s(3)) ## carryResult(s(2)) ## carryResult(s(1)) ## carryResult(s(0))
+  val cout16 = carryResult(s(3)) ## carryResult(s(1))
+  val cout32 = carryResult(s(3))
   val ps = VecInit(pairs.map(_._1)).asUInt
 
   /** build cs for all cases
@@ -150,8 +141,8 @@ class vectorAdder(val width: Int) extends Module {
     */
   val carryInSele = Mux1H(Seq(
     sew(0) -> cin,
-    sew(1) -> carryResult(s2) ## cin(2)          ## carryResult(s0) ## cin(0),
-    sew(2) -> carryResult(s2) ## carryResult(s1) ## carryResult(s0) ## cin(0),
+    sew(1) -> carryResult(s(2)) ## cin(2)          ## carryResult(s(0)) ## cin(0),
+    sew(2) -> carryResult(s(2)) ## carryResult(s(1)) ## carryResult(s(0)) ## cin(0),
   ))
   val cs = Cat(
     carryResult(30, 24), carryInSele(3),
