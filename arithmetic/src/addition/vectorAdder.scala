@@ -45,6 +45,7 @@ class vectorAdder(val width: Int) extends Module {
   val e3 = s3+1
   
   val eSeq = Seq(0,8,16,24)
+  val indexSeq = Seq(0,1,2,3)
   
 
   val cin = IO(Input(UInt(4.W)))
@@ -114,11 +115,10 @@ class vectorAdder(val width: Int) extends Module {
     * It's why 16sew input cin should be xxyy instead of 0x0y.
     */
   def buildCarry(tree: Seq[(Bool, Bool)], cin: UInt): UInt = {
-    val ci0: UInt = VecInit(tree.slice(0 , e0).map(pg => cgen(pg, cin(0)))).asUInt
-    val ci1: UInt = VecInit(tree.slice(e0, e1).map(pg => cgen(pg, cin(1)))).asUInt
-    val ci2: UInt = VecInit(tree.slice(e1, e2).map(pg => cgen(pg, cin(2)))).asUInt
-    val ci3: UInt = VecInit(tree.slice(e2, e3).map(pg => cgen(pg, cin(3)))).asUInt
-    Cat(ci3, ci2, ci1, ci0)
+    val cbank = eSeq.zip(indexSeq).map{
+      case (e,i) => VecInit(tree.slice(e , e+8).map(pg => cgen(pg, cin(i)))).asUInt
+    }
+    Cat(cbank(3), cbank(2), cbank(1), cbank(0))
   }
 
   /** if carry generated in each bit , in order */
