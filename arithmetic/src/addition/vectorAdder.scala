@@ -44,6 +44,8 @@ class vectorAdder(val width: Int) extends Module {
   val e2 = s2+1
   val e3 = s3+1
   
+  val eSeq = Seq(0,8,16,24)
+  
 
   val cin = IO(Input(UInt(4.W)))
   val cout = IO(Output(UInt(4.W)))
@@ -77,13 +79,13 @@ class vectorAdder(val width: Int) extends Module {
   }
 
   val pairs: Seq[(Bool, Bool)] = zeroLayer(as, bs)
-  val tree8Leaf0 = bk8(pairs.slice(0 , e0))
-  val tree8Leaf1 = bk8(pairs.slice(e0, e1))
-  val tree8Leaf2 = bk8(pairs.slice(e1, e2))
-  val tree8Leaf3 = bk8(pairs.slice(e2, e3))
-  val tree8: Seq[(Bool, Bool)] = tree8Leaf0 ++ tree8Leaf1 ++ tree8Leaf2 ++ tree8Leaf3
-  val tree16Leaf0 = tree8Leaf0 ++ tree8Leaf1.map(prefixadd(_, tree8Leaf0(s0)))
-  val tree16Leaf1 = tree8Leaf2 ++ tree8Leaf3.map(prefixadd(_, tree8Leaf2(s0)))
+
+  val tree8Leaf = eSeq.map{
+    case i => bk8(pairs.slice(i , i+8))
+  }
+  val tree8: Seq[(Bool, Bool)] = tree8Leaf.fold(Nil)(_++_)
+  val tree16Leaf0 = tree8Leaf(0) ++ tree8Leaf(1).map(prefixadd(_, tree8Leaf(0)(7)))
+  val tree16Leaf1 = tree8Leaf(2) ++ tree8Leaf(3).map(prefixadd(_, tree8Leaf(2)(7)))
   val tree16: Seq[(Bool, Bool)] = tree16Leaf0 ++ tree16Leaf1
   val tree32 = tree16Leaf0 ++ tree16Leaf1.map(prefixadd(_, tree16Leaf0(s1)))
 
