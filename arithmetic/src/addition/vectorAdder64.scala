@@ -27,20 +27,19 @@ import chisel3.util._
   *}}}
   *
   */
-class vectorAdder(val width: Int) extends Module {
-  require(width > 0)
+class vectorAdder64 extends Module {
+  val width = 64
   val a: UInt = IO(Input(UInt(width.W)))
   val b: UInt = IO(Input(UInt(width.W)))
   val z: UInt = IO(Output(UInt(width.W)))
-  val sew = IO(Input(UInt(3.W)))
+  val sew = IO(Input(UInt(4.W)))
 
-  
-  val indexSeq = Seq(0,1,2,3)
+  val indexSeq = Seq(0,1,2,3,4,5,6,7)
   val e = indexSeq.map(i => i * 8)
-  val s = Seq(7,15,23,31)
-
-  val cin = IO(Input(UInt(4.W)))
-  val cout = IO(Output(UInt(4.W)))
+  val s = Seq(7,15,23,31,39,47,55,63)
+  
+  val cin = IO(Input(UInt(8.W)))
+  val cout = IO(Output(UInt(8.W)))
 
   // Split up bit vectors into individual bits and reverse it
   val as: Seq[Bool] = a.asBools
@@ -78,8 +77,13 @@ class vectorAdder(val width: Int) extends Module {
   val tree8: Seq[(Bool, Bool)] = tree8Leaf.fold(Nil)(_++_)
   val tree16Leaf0 = tree8Leaf(0) ++ tree8Leaf(1).map(prefixadd(_, tree8Leaf(0)(7)))
   val tree16Leaf1 = tree8Leaf(2) ++ tree8Leaf(3).map(prefixadd(_, tree8Leaf(2)(7)))
-  val tree16: Seq[(Bool, Bool)] = tree16Leaf0 ++ tree16Leaf1
-  val tree32 = tree16Leaf0 ++ tree16Leaf1.map(prefixadd(_, tree16Leaf0(15)))
+  val tree16Leaf2 = tree8Leaf(4) ++ tree8Leaf(5).map(prefixadd(_, tree8Leaf(4)(7)))
+  val tree16Leaf3 = tree8Leaf(6) ++ tree8Leaf(7).map(prefixadd(_, tree8Leaf(6)(7)))
+  val tree16: Seq[(Bool, Bool)] = tree16Leaf0 ++ tree16Leaf1 ++ tree16Leaf2 ++ tree16Leaf3
+  val tree32Leaf0 = tree16Leaf0 ++ tree16Leaf1.map(prefixadd(_, tree16Leaf0(15)))
+  val tree32Leaf1 = tree16Leaf2 ++ tree16Leaf3.map(prefixadd(_, tree16Leaf2(15)))
+  val tree32 = tree32Leaf0 ++ tree32Leaf1
+  val tree64 = tree32Leaf0 ++ tree32Leaf1.map(prefixadd(_, tree32Leaf0(31)))
 
   val tree8P  = VecInit(tree8.map(_._1)).asUInt
   val tree8G  = VecInit(tree8.map(_._2)).asUInt
@@ -87,17 +91,21 @@ class vectorAdder(val width: Int) extends Module {
   val tree16G = VecInit(tree16.map(_._2)).asUInt
   val tree32P = VecInit(tree32.map(_._1)).asUInt
   val tree32G = VecInit(tree32.map(_._2)).asUInt
+  val tree64P = VecInit(tree64.map(_._1)).asUInt
+  val tree64G = VecInit(tree64.map(_._2)).asUInt
 
   val treeP = Mux1H(Seq(
     sew(0) -> tree8P,
     sew(1) -> tree16P,
-    sew(2) -> tree32P
+    sew(2) -> tree32P,
+    sew(3) -> tree64P
   ))
 
   val treeG = Mux1H(Seq(
     sew(0) -> tree8G,
     sew(1) -> tree16G,
-    sew(2) -> tree32G
+    sew(2) -> tree32G,
+    sew(3) -> tree64G
   ))
   val tree = treeP.asBools.zip(treeG.asBools)
 
@@ -109,14 +117,29 @@ class vectorAdder(val width: Int) extends Module {
     val cbank = e.zip(indexSeq).map{
       case (e,i) => VecInit(tree.slice(e , e+8).map(pg => cgen(pg, cin(i)))).asUInt
     }
-    Cat(cbank(3), cbank(2), cbank(1), cbank(0))
+    Cat(cbank(7), cbank(6), cbank(5), cbank(4), cbank(3), cbank(2), cbank(1), cbank(0))
   }
 
   /** if carry generated in each bit , in order */
-  val carryResult = buildCarry(tree, cin)
-  val cout8  = carryResult(s(3)) ## carryResult(s(2)) ## carryResult(s(1)) ## carryResult(s(0))
-  val cout16 = carryResult(s(3)) ## carryResult(s(1))
-  val cout32 = carryResult(s(3))
+  val carryResult: UInt = buildCarry(tree, cin)
+  /** build final cout */
+  val cout8 =
+      carryResult(s(7)) ##
+      carryResult(s(6)) ##
+      carryResult(s(5)) ##
+      carryResult(s(4)) ##
+      carryResult(s(3)) ##
+      carryResult(s(2)) ##
+      carryResult(s(1)) ##
+      carryResult(s(0))
+  val cout16 =
+      carryResult(s(7)) ##
+      carryResult(s(5)) ##
+      carryResult(s(3)) ##
+      carryResult(s(1))
+  val cout32 =
+    carryResult(s(7)) ## carryResult(s(3))
+  val cout64 = carryResult(s(7))
 
   /** build cs for all cases
     *
@@ -140,22 +163,54 @@ class vectorAdder(val width: Int) extends Module {
     */
   val carryInSele = Mux1H(Seq(
     sew(0) -> cin,
-    sew(1) -> carryResult(s(2)) ## cin(2)          ## carryResult(s(0)) ## cin(0),
-    sew(2) -> carryResult(s(2)) ## carryResult(s(1)) ## carryResult(s(0)) ## cin(0),
+    sew(1) ->
+        carryResult(s(6)) ##
+        cin(6) ##
+        carryResult(s(4)) ##
+        cin(4) ##
+        carryResult(s(2)) ##
+        cin(2) ##
+        carryResult(s(0)) ##
+        cin(0),
+    sew(2) ->
+        carryResult(s(6)) ##
+        carryResult(s(5)) ##
+        carryResult(s(4)) ##
+        cin(4)            ##
+        carryResult(s(2)) ##
+        carryResult(s(1)) ##
+        carryResult(s(0)) ##
+        cin(0),
+    sew(3) ->
+        carryResult(s(6)) ##
+        carryResult(s(5)) ##
+        carryResult(s(4)) ##
+        carryResult(s(3)) ##
+        carryResult(s(2)) ##
+        carryResult(s(1)) ##
+        carryResult(s(0)) ##
+        cin(0),
   ))
   val cs = Cat(
+    carryResult(62, 56), carryInSele(7),
+    carryResult(54, 48), carryInSele(6),
+    carryResult(46, 40), carryInSele(5),
+    carryResult(38, 32), carryInSele(4),
     carryResult(30, 24), carryInSele(3),
     carryResult(22, 16), carryInSele(2),
     carryResult(14, 8),  carryInSele(1),
-    carryResult(6, 0),   carryInSele(0))
+    carryResult(6, 0),   carryInSele(0)
+  )
 
   cout := Mux1H(Seq(
     sew(0) -> cout8,
     sew(1) -> cout16,
     sew(2) -> cout32,
+    sew(3) -> cout64,
   ))
 
   val ps = VecInit(pairs.map(_._1)).asUInt
+
   z := ps ^ cs
 }
 

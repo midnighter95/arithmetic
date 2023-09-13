@@ -8,37 +8,52 @@ import multiplier._
 object T extends App{
   val testRunDir = os.pwd / "test_run_dir"
   os.makeDir.all(testRunDir)
-  os.remove(testRunDir / "wallaceMultiplier32.sv")
-  os.write(testRunDir / "wallaceMultiplier32.sv", chisel3.getVerilogString(new UnsignedWallaceMultiplier(32,32)()))
+  os.remove(testRunDir / "NormalAdder128L.sv")
+  os.write(testRunDir / "NormalAdder128L.sv", chisel3.getVerilogString(new AdderLatency(128)))
 
 }
 
-class vAdder extends Module{
-  val a: UInt = IO(Input(UInt(32.W)))
-  val b: UInt = IO(Input(UInt(32.W)))
-  val cin = IO(Input(UInt(4.W)))
-  val sew = IO(Input(UInt(3.W)))
-  val z: UInt = IO(Output(UInt(32.W)))
-  val cout = IO(Output(UInt(4.W)))
+class AdderLatency(width: Int) extends Module{
+  val a: UInt = IO(Input(UInt(width.W)))
+  val b: UInt = IO(Input(UInt(width.W)))
+  val cin = IO(Input(UInt(1.W)))
+  val z: UInt = IO(Output(UInt(width.W)))
+  val cout = IO(Output(UInt(1.W)))
 
-  val aReg = RegNext(a,0.U(32.W))
-  val bReg = RegNext(b,0.U(32.W))
-  val cReg = RegNext(cin,0.U(4.W))
-  val sewReg = RegNext(sew,0.U(3.W))
+  val aReg = RegNext(a, 0.U(width.W))
+  val bReg = RegNext(b, 0.U(width.W))
+  val cReg = RegNext(cin, 0.U(1.W))
 
+//  val Adder = Module(new BrentKungAdder(32))
+//  Adder.a := aReg
+//  Adder.b := bReg
+//  Adder.cin := cReg
 
+  val sum = aReg +& bReg +& cReg
 
-  val Adder = Module(new BrentKungAdder(32))
-  Adder.a := aReg
-  Adder.b := bReg
-  Adder.cin := cReg
-
-  val zReg = RegNext(Adder.z, 0.U(32.W))
-  val coutReg = RegNext(Adder.cout, 0.U(4.W))
-
+  val zReg = RegNext(sum(31,0), 0.U(32.W))
+  val coutReg = RegNext(sum(32), 0.U(1.W))
 
   z := zReg
-  cout := zReg
+  cout := coutReg
+}
+
+class AdderArea(width: Int) extends Module{
+  val a: UInt = IO(Input(UInt(width.W)))
+  val b: UInt = IO(Input(UInt(width.W)))
+  val cin = IO(Input(UInt(1.W)))
+  val z: UInt = IO(Output(UInt(width.W)))
+  val cout = IO(Output(UInt(1.W)))
+
+//  val Adder = Module(new BrentKungAdder(32))
+//  Adder.a := a
+//  Adder.b := b
+//  Adder.cin := cin
+
+  val sum = a +& b +& cin
+
+  z := sum(31,0)
+  cout := sum(32)
 }
 
 
