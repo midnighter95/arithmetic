@@ -6,7 +6,7 @@ import utest._
 
 import scala.util.Random
 
-object vectorAdderTester16 extends TestSuite with ChiselUtestTester {
+object vectorAdder32Tester16 extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
     test("vectorAdder16 should pass") {
       def testcase(width: Int): Unit = {
@@ -43,9 +43,9 @@ object vectorAdderTester16 extends TestSuite with ChiselUtestTester {
 
         // test
         testCircuit(
-          new vectorAdder(width),
+          new vectorAdder32,
           Seq(chiseltest.internal.NoThreadingAnnotation, chiseltest.simulator.WriteVcdAnnotation)
-        ) { dut: vectorAdder =>
+        ) { dut: vectorAdder32 =>
 //          println("a = " + a)
 //          println("aInput=" + aInput)
 //          println("b = " + b)
