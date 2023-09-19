@@ -8,8 +8,9 @@ import chisel3.util._
 class Multiplier16 extends Module{
   val a = IO(Input(UInt(16.W)))
   val b = IO(Input(UInt(16.W)))
-  val z = IO(Output(UInt(32.W)))
   val sew = IO(Input(UInt(2.W)))
+  val outCarry = IO(Output(UInt(32.W)))
+  val outSum   = IO(Output(UInt(32.W)))
 
   val a0Vec = a(7, 0).asBools
   val a1Vec = a(15, 8).asBools
@@ -53,9 +54,6 @@ class Multiplier16 extends Module{
   /** 16bits << 16 */
   val ax11 = compress82(a1x1)
 
-  val ax00result = addition.prefixadder.apply(BrentKungSum)(ax00._1(15,0) , ax00._2(15,0), false.B)
-  val ax11result = addition.prefixadder.apply(BrentKungSum)(ax11._1(15,0) , ax11._2(15,0), false.B)
-
   val axSeq: Seq[(UInt, UInt)] = Seq(ax00,ax01,ax10,ax11)
   def merge16(in: Seq[(UInt, UInt)]): (UInt, UInt) = {
     val layer00 = csa42(24)(VecInit(
@@ -78,20 +76,19 @@ class Multiplier16 extends Module{
 
   val result16 = merge16(axSeq)
 
-  val output16 = addition.prefixadder.apply(BrentKungSum)(result16._1, result16._2)
-  val output8 = ax11result(15,0) ## ax00result(15,0)
-
-  z := Mux(sew(0), output8, output16)
+  outCarry := Mux(sew(0), ax11._1(15,0) ## ax00._1(15,0), result16._1)
+  outSum   := Mux(sew(0), ax11._2(15,0) ## ax00._2(15,0), result16._2)
 }
 
 object Multiplier16 {
   def apply(a: UInt,
-             b: UInt, sew:UInt) = {
+            b: UInt,
+            sew: UInt) = {
     val mul16 = Module(new Multiplier16)
     // This need synthesis tool to do constant propagation
     mul16.a := a
     mul16.b := b
     mul16.sew := sew
-    mul16.z
+    Seq(mul16.outCarry, mul16.outSum)
   }
 }

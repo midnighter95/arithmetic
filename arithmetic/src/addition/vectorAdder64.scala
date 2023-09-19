@@ -214,3 +214,15 @@ class vectorAdder64 extends Module {
   z := ps ^ cs
 }
 
+object vectorAdder64 {
+  def apply(a: UInt,
+            b: UInt, sew:UInt) = {
+    val adder64 = Module(new vectorAdder64)
+    adder64.a := a
+    adder64.b := b
+    adder64.cin := 0.U
+    adder64.sew := sew
+    adder64.z
+  }
+}
+
