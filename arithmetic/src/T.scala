@@ -7,9 +7,10 @@ import multiplier._
 
 object T extends App{
   val testRunDir = os.pwd / "test_run_dir"
+  val name = "Multiplier32L.sv"
   os.makeDir.all(testRunDir)
-  os.remove(testRunDir / "NormalAdder128L.sv")
-  os.write(testRunDir / "NormalAdder128L.sv", chisel3.getVerilogString(new AdderLatency(128)))
+  os.remove(testRunDir / name)
+  os.write(testRunDir / name, chisel3.getVerilogString(new Multiplier32L))
 
 }
 
@@ -59,11 +60,10 @@ class Multiplier32L extends Module{
   val aReg = RegNext(a,0.U(32.W))
   val bReg = RegNext(b,0.U(32.W))
 
-  val Mul = Module(new VectorMultiplier32)
+  val Mul = Module(new Multiplier32)
   Mul.a := aReg
   Mul.b := bReg
   Mul.sew := 4.U(3.W)
-  Mul.unsign := true.B
 
   val zReg = RegNext(Mul.z, 0.U(64.W))
 
