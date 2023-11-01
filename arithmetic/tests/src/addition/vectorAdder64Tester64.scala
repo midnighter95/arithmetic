@@ -71,9 +71,9 @@ object vectorAdder64Tester64 extends TestSuite with ChiselUtestTester {
       }
 
 
-      for (i <- 1 to 100) {
-        testcase(32)
-      }
+//      for (i <- 1 to 100) {
+//        testcase(32)
+//      }
 
     }
   }

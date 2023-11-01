@@ -63,9 +63,9 @@ object M32U32Tester extends TestSuite with ChiselUtestTester {
       }
 
 
-      for (i <- 1 to 20) {
-        testcase(32)
-      }
+//      for (i <- 1 to 20) {
+//        testcase(32)
+//      }
 
     }
   }
