@@ -7,10 +7,11 @@ import multiplier._
 
 object T extends App{
   val testRunDir = os.pwd / "test_run_dir"
-  val name = "Multiplier32L.sv"
+  val name = "KSAdder32L.sv"
+  println("Generating "+ name)
   os.makeDir.all(testRunDir)
   os.remove(testRunDir / name)
-  os.write(testRunDir / name, chisel3.getVerilogString(new Multiplier32L))
+  os.write(testRunDir / name, chisel3.getVerilogString(new KSAdder32L))
 
 }
 
@@ -91,7 +92,85 @@ class Abs(n: Int) extends Module {
   io.aSign := io.signIn && aSign
   io.bSign := io.signIn && bSign
 }
+class BKAdder32A extends Module{
+  val a    = IO(Input(UInt(32.W)))
+  val b    = IO(Input(UInt(32.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(32.W)))
+  val cout = IO(Output(Bool()))
 
+
+  val m = Module(new BrentKungAdder(32))
+  m.a := a
+  m.b := b
+  m.cin := cin
+
+  z := m.z
+  cout := m.cout
+}
+
+class KSAdder32A extends Module{
+  val a    = IO(Input(UInt(32.W)))
+  val b    = IO(Input(UInt(32.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(32.W)))
+  val cout = IO(Output(Bool()))
+
+
+  val m = Module(new KoggeStoneAdder(32))
+  m.a := a
+  m.b := b
+  m.cin := cin
+
+  z := m.z
+  cout := m.cout
+}
+
+class BKAdder32L extends Module{
+  val a    = IO(Input(UInt(32.W)))
+  val b    = IO(Input(UInt(32.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(32.W)))
+  val cout = IO(Output(Bool()))
+
+  val aReg = RegNext(a)
+  val bReg = RegNext(a)
+  val cinReg = RegNext(a)
+
+  val m = Module(new BrentKungAdder(32))
+  m.a := aReg
+  m.b := bReg
+  m.cin := cinReg
+
+  val zReg = RegNext(m.z)
+  val coutReg = RegNext(m.cout)
+
+  z := zReg
+  cout := coutReg
+}
+
+class KSAdder32L extends Module{
+  val a    = IO(Input(UInt(32.W)))
+  val b    = IO(Input(UInt(32.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(32.W)))
+  val cout = IO(Output(Bool()))
+
+  val aReg = RegNext(a)
+  val bReg = RegNext(a)
+  val cinReg = RegNext(a)
+
+  val m = Module(new KoggeStoneAdder(32))
+  m.a := aReg
+  m.b := bReg
+  m.cin := cinReg
+
+  val zReg = RegNext(m.z)
+  val coutReg = RegNext(m.cout)
+
+  z := zReg
+  cout := coutReg
+}
 
 
 
