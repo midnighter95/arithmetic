@@ -7,15 +7,15 @@ import addition.prefixadder.graph._
 import chisel3._
 import float._
 
-object T extends App{
-  println("T work fine")
-
-  val name = "DemoAdder"
-  val testRunDir = os.pwd / "test_run_dir"
-  os.makeDir.all(testRunDir)
-  os.remove(testRunDir / s"$name.sv")
-  os.write(testRunDir / s"$name.sv", chisel3.getVerilogString(new DemoAdderWithGraph))
-}
+//object T extends App{
+//  println("T work fine")
+//
+//  val name = "DemoAdder"
+//  val testRunDir = os.pwd / "test_run_dir"
+//  os.makeDir.all(testRunDir)
+//  os.remove(testRunDir / s"$name.sv")
+//  os.write(testRunDir / s"$name.sv", chisel3.getVerilogString(new DemoAdderWithGraph))
+//}
 
 object Adder8ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSum {
   val zeroLayer: Seq[PrefixNode] = Seq.tabulate(8)(PrefixNode(_))

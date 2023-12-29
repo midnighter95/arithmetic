@@ -14,6 +14,7 @@ object v {
 
   val scalatest = ivy"org.scalatest::scalatest:3.2.0"
   val scalapar = ivy"org.scala-lang.modules::scala-parallel-collections:1.0.4"
+  val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
 }
 
 object arithmetic extends Cross[Arithmetic](v.chiselCrossVersions.keys.toSeq)
@@ -33,6 +34,8 @@ trait Arithmetic
 
   def evilplotIvy = v.evilplot
 
+  def mainargsIvy = v.mainargs
+
   def chiselModule = None
 
   def chiselPluginJar = None
@@ -40,6 +43,21 @@ trait Arithmetic
   def chiselIvy = Some(v.chiselCrossVersions(crossValue)._1)
 
   def chiselPluginIvy = Some(v.chiselCrossVersions(crossValue)._2)
+
+  def elaborate = T {
+    // class path for `moduleDeps` is only a directory, not a jar, which breaks the cache.
+    // so we need to manually add the class files of `moduleDeps` here.
+    upstreamCompileOutput()
+    mill.util.Jvm.runLocal(
+      finalMainClass(),
+      runClasspath().map(_.path),
+      Seq(
+        "--dir", T.dest.toString,
+      ),
+    )
+    println("output to"+T.dest.toString)
+    PathRef(T.dest)
+  }
 }
 
 trait ArithmeticTest
