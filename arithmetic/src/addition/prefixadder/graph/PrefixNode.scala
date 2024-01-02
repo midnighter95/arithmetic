@@ -2,8 +2,15 @@ package addition.prefixadder.graph
 
 import scala.math.Ordered.orderingToOrdered
 
+/** @param level level
+  * @param index assign index
+  * @param prefixData
+  *
+  *
+  */
 case class PrefixNode(level: Int, fathers: Set[PrefixNode], prefixData: Set[Int], index: Int)
     extends Ordered[PrefixNode] {
+  /** position */
   val bit:               Int = prefixData.max
   override def toString: String = s"Node$level-$bit-$index"
   override def compare(that: PrefixNode): Int = (this.bit, this.level).compare(that.bit, that.level)
