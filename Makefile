@@ -13,6 +13,9 @@ test:
 firrtl:
 	mill -i -j 0 arithmetic[5.0.0].elaborate
 
+mfccompile:
+	mill -i -j 0 arithmetic[5.0.0].mfccompile
+
 bsp:
 	mill -i mill.bsp.BSP/install
 

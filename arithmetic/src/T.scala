@@ -7,16 +7,6 @@ import addition.prefixadder.graph._
 import chisel3._
 import float._
 
-//object T extends App{
-//  println("T work fine")
-//
-//  val name = "DemoAdder"
-//  val testRunDir = os.pwd / "test_run_dir"
-//  os.makeDir.all(testRunDir)
-//  os.remove(testRunDir / s"$name.sv")
-//  os.write(testRunDir / s"$name.sv", chisel3.getVerilogString(new DemoAdderWithGraph))
-//}
-
 object Adder8ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSum {
   val zeroLayer: Seq[PrefixNode] = Seq.tabulate(8)(PrefixNode(_))
 
@@ -147,23 +137,9 @@ object BrentKungSum33ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixS
   )
 }
 
-class DemoAdder32WithGraph extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.width - 1, BrentKungSum33ByGraph)
+class ThreeCombineAdder32 extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.width - 1, BrentKungSum33ByGraph)
 
 class DemoAdder8WithGraph extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
-
-//class NormalAdder8Area extends Module{
-//  val a = Input(UInt(8.W))
-//  val b = Input(UInt(8.W))
-//  val cin = Input(Bool())
-//  val z = Output(UInt(8.W))
-//  val cout = Output(Bool())
-//
-//  val sum = Wire(UInt(9.W))
-//  sum := a + b + cin
-//
-//  z := sum(7,0)
-//  cout := sum(8)
-//}
 
 class BKAdder8A extends Module{
   val a    = IO(Input(UInt(8.W)))

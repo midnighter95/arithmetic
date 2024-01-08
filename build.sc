@@ -58,6 +58,37 @@ trait Arithmetic
     println("output to"+T.dest.toString)
     PathRef(T.dest)
   }
+
+  def chirrtl = T {
+    os.walk(elaborate().path).collectFirst { case p if p.last.endsWith("fir") => p }.map(PathRef(_)).get
+  }
+
+  def chiselAnno = T {
+    os.walk(elaborate().path).collectFirst { case p if p.last.endsWith("anno.json") => p }.map(PathRef(_)).get
+  }
+
+  def topName: Target[String] = T{
+    chirrtl().path.last.split('.').head
+  }
+
+  def mfccompile = T {
+    os.proc("firtool",
+      chirrtl().path,
+      s"--annotation-file=${chiselAnno().path}",
+      "--disable-annotation-unknown",
+      "--strip-fir-debug-info",
+      "--strip-debug-info",
+      "-dedup",
+      "-O=debug",
+      "--verilog",
+      "--preserve-values=named",
+      "--output-annotation-file=mfc.anno.json",
+      "--lowering-options=verifLabels",
+      s"-o=${T.dest/topName()}"
+    ).call(T.dest)
+    PathRef(T.dest)
+  }
+
 }
 
 trait ArithmeticTest
