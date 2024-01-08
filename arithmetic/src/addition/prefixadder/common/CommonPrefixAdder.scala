@@ -72,15 +72,12 @@ class GeneratePG extends Module{
   val b = IO(Input(Bool()))
   val p = IO(Output(Bool()))
   val g = IO(Output(Bool()))
-  p := a ^ b
-  g := a & b
+  p := addition.Xor(a,b)
+  g := addition.And(a,b)
 }
 object GeneratePG{
   def apply(a:Bool, b:Bool):(Bool,Bool)={
-    val pg = Module(new GeneratePG)
-    pg.a := a
-    pg.b := b
-    (pg.p, pg.g)
+    (addition.Xor(a,b), addition.And(a,b))
   }
 }
 
@@ -93,17 +90,12 @@ class PrefixAdd2 extends Module{
   val pOut = IO(Output(Bool()))
   val gOut = IO(Output(Bool()))
 
-  pOut := p0 && p1
+  pOut := addition.And(p0,p1)
   gOut := (g0 && p1) || g1
 }
 object PrefixAdd2{
   def apply(p0:Bool, g0:Bool, p1:Bool, g1:Bool):(Bool,Bool)={
-    val add = Module(new PrefixAdd2)
-    add.p0 := p0
-    add.g0 := g0
-    add.p1 := p1
-    add.g1 := g1
-    (add.pOut, add.gOut)
+    (addition.TwoCombineP(p0,p1), addition.TwoCombineG(g0, p1, g1))
   }
 }
 class PrefixAdd3 extends Module{
@@ -120,16 +112,10 @@ class PrefixAdd3 extends Module{
   pOut := p0 && p1 && p2
   gOut := (g0 && p1 && p2) || (g1 && p2) || g2
 }
+
 object PrefixAdd3{
   def apply(p0:Bool, g0:Bool, p1:Bool, g1:Bool, p2:Bool, g2:Bool):(Bool,Bool)={
-    val add = Module(new PrefixAdd3)
-    add.p0 := p0
-    add.g0 := g0
-    add.p1 := p1
-    add.g1 := g1
-    add.p2 := p2
-    add.g2 := g2
-    (add.pOut, add.gOut)
+    (addition.ThreeCombineP(p0, p1, p2), addition.ThreeCombineG(g0, p1, g1, p2, g2))
   }
 }
 
@@ -151,16 +137,7 @@ class PrefixAdd4 extends Module{
 }
 object PrefixAdd4{
   def apply(p0:Bool, g0:Bool, p1:Bool, g1:Bool, p2:Bool, g2:Bool,p3:Bool, g3:Bool):(Bool,Bool)={
-    val add = Module(new PrefixAdd4)
-    add.p0 := p0
-    add.g0 := g0
-    add.p1 := p1
-    add.g1 := g1
-    add.p2 := p2
-    add.g2 := g2
-    add.p3 := p3
-    add.g3 := g3
-    (add.pOut, add.gOut)
+    (addition.FourCombineP(p0, p1, p2, p3), addition.FourCombineG(g0, p1, g1, p2, g2,p3, g3))
   }
 }
 

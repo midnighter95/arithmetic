@@ -139,6 +139,8 @@ object BrentKungSum33ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixS
 
 class ThreeCombineAdder32 extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.width - 1, BrentKungSum33ByGraph)
 
+class FourCombineAdder8 extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
+
 class DemoAdder8WithGraph extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
 
 class BKAdder8A extends Module{
