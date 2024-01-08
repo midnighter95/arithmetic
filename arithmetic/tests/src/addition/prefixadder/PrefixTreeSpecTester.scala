@@ -30,6 +30,29 @@ object BrentKungSum8ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSu
   )
 }
 
+object Adder8ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSum {
+  val zeroLayer: Seq[PrefixNode] = Seq.tabulate(8)(PrefixNode(_))
+
+  val node17 = PrefixNode(zeroLayer(7), zeroLayer(6), zeroLayer(5), zeroLayer(4))
+  val node16 = PrefixNode(zeroLayer(6), zeroLayer(5), zeroLayer(4))
+  val node15 = PrefixNode(zeroLayer(5), zeroLayer(4))
+  val node13 = PrefixNode(zeroLayer(3), zeroLayer(2), zeroLayer(1), zeroLayer(0))
+  val node12 = PrefixNode(zeroLayer(2), zeroLayer(1), zeroLayer(0))
+  val node11 = PrefixNode(zeroLayer(1), zeroLayer(0))
+
+  val node27 = PrefixNode(node17, node13)
+  val node26 = PrefixNode(node16, node13)
+  val node25 = PrefixNode(node15, node13)
+  val node24 = PrefixNode(zeroLayer(4), node13)
+
+
+  val prefixGraph = PrefixGraph(
+    zeroLayer.toSet +
+      node17 + node16 + node15 + node13 + node12 + node11 +
+      node27 + node26 + node25 + node24
+  )
+}
+
 object BrentKungSum33ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSum {
   val zeroLayer: Seq[PrefixNode] = Seq.tabulate(33)(PrefixNode(_))
   val node101: PrefixNode = PrefixNode(zeroLayer(0), zeroLayer(1))
@@ -114,7 +137,9 @@ object BrentKungSum33ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixS
   )
 }
 
-class DemoPrefixAdderWithGraph extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.width - 1, BrentKungSum33ByGraph)
+class ThreeCombineAdder32 extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.width - 1, BrentKungSum33ByGraph)
+
+class FourCombineAdder7 extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
 
 object PrefixTreeSpecTester extends FormalSuite {
 
@@ -142,8 +167,11 @@ object PrefixTreeSpecTester extends FormalSuite {
         case _: Throwable => false
       }
     }
-    test("DemoPrefixAdderWithGraph should pass test") {
-      verify(new DemoPrefixAdderWithGraph, Seq(BoundedCheck(1)))
+    test("ThreeCombineAdder32 should pass test") {
+      verify(new ThreeCombineAdder32, Seq(BoundedCheck(1)))
+    }
+    test("FourCombineAdder7 should pass test") {
+      verify(new FourCombineAdder7, Seq(BoundedCheck(1)))
     }
     test("should generate graphML file") {
       os.write.over(os.pwd / "PrefixGraph.dot", PrefixGraph(zeroLayer.toSet + node1 + node2 + node3 + node4).toString)
