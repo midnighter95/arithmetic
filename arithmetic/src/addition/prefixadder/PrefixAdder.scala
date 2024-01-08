@@ -1,6 +1,6 @@
 package addition.prefixadder
 
-import addition.FullAdder
+import addition._
 import chisel3._
 import chisel3.util.Cat
 import logger.LazyLogging
@@ -63,7 +63,7 @@ class PrefixAdder(val width: Int, prefixSum: PrefixSum) extends FullAdder {
   // Sum requires propagate bits from first step
   val ps: Seq[Bool] = pairs.map(_._1) :+ false.B // Include P for overflow
   // Si = Pi xor Ci-1
-  val sum: Seq[Bool] = ps.zip(cs).map { case (p, c) => p ^ c }
+  val sum: Seq[Bool] = ps.zip(cs).map { case (p, c) => addition.Xor(p,c) }
 
   // Recombine bits into bitvector
   val s: UInt = VecInit(sum).asUInt
