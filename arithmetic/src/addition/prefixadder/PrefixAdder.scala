@@ -63,11 +63,12 @@ class PrefixAdder(val width: Int, prefixSum: PrefixSum) extends FullAdder {
   // Sum requires propagate bits from first step
   val ps: Seq[Bool] = pairs.map(_._1) :+ false.B // Include P for overflow
   // Si = Pi xor Ci-1
-  val sum: Seq[Bool] = ps.zip(cs).map { case (p, c) => addition.Xor(p,c) }
+  ps.zip(cs).zipWithIndex.foreach { case ((p, c), index) =>
+    if(index==0)
+      cout := addition.Xor(p,c)
+    else
+      z(index) := addition.Xor(p,c)
+  }
 
-  // Recombine bits into bitvector
-  val s: UInt = VecInit(sum).asUInt
 
-  cout := s.head(1)
-  z := s(width, 1)
 }
