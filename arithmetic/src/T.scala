@@ -29,8 +29,13 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(2, 2, 2, 2, 2, 2, 1, 1)
   )
 
+  val matirx3 = Seq(
+    Seq(4, 3, 2, 1, 4, 3, 2, 1),
+    Seq(2, 2, 2, 2, 1, 1, 1, 1),
+  )
 
-  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx1)
+
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx3)
 
 
   GraphToJson.elaborate(dotgraph)

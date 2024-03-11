@@ -74,6 +74,21 @@ class PrefixAdder(val width: Int, prefixSum: PrefixSum) extends FullAdder {
   // Recombine bits into bitvector
   val s: UInt = VecInit(sum).asUInt
 
-  cout := s.head(1)
-  z := s(width, 1)
+  Connect(s.head(1), cout)
+  Connect(s(width, 1), z)
+}
+
+class Connect(width: Int) extends Module{
+  val in = IO(Input(UInt(width.W)))
+  val out = IO(Output(UInt(width.W)))
+  out := in
+  override def desiredName = s"Connect${width}"
+}
+
+object Connect{
+  def apply(a:UInt, b:UInt) = {
+    val connect = Module(new Connect(a.getWidth))
+    connect.in := a
+    b := connect.out
+  }
 }
