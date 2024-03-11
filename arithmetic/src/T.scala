@@ -7,6 +7,37 @@ import addition.prefixadder.graph._
 import chisel3._
 import float._
 
+object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
+  println("This is playgorund")
+
+  val matirx = Seq(
+    Seq(1, 3, 2, 1),
+    Seq(2, 1, 1, 1)
+  )
+
+  val matirx1 = Seq(
+    Seq(2, 1, 2, 1, 2, 1, 2, 1),
+    Seq(2, 1, 1, 1, 2, 2, 1, 1),
+    Seq(2, 1, 1, 1, 2, 2, 1, 1),
+    Seq(2, 1, 2, 2, 1, 1, 1, 1),
+    Seq(1, 2, 1, 1, 1, 1, 1, 1)
+  )
+
+  val matirx2 = Seq(
+    Seq(2, 1, 2, 1, 2, 1, 2, 1),
+    Seq(2, 2, 1, 1, 2, 2, 1, 1),
+    Seq(2, 2, 2, 2, 2, 2, 1, 1)
+  )
+
+
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx1)
+
+
+  GraphToJson.elaborate(dotgraph)
+  os.write.over(os.pwd / "graph.graphml", Graphml(dotgraph).toString)
+  val prefixGraph: PrefixGraph = PrefixGraph(os.pwd / "graph.json")
+}
+
 object Adder8ByGraph extends HasPrefixSumWithGraphImp with CommonPrefixSum {
   val zeroLayer: Seq[PrefixNode] = Seq.tabulate(8)(PrefixNode(_))
 
@@ -142,6 +173,8 @@ class ThreeCombineAdder32 extends PrefixAdder(BrentKungSum33ByGraph.prefixGraph.
 class FourCombineAdder8 extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
 
 class DemoAdder8WithGraph extends PrefixAdder(Adder8ByGraph.prefixGraph.width - 1, Adder8ByGraph)
+
+class AdderFromJson extends PrefixAdder(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 
 class BKAdder8A extends Module{
   val a    = IO(Input(UInt(8.W)))

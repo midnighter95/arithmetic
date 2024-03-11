@@ -17,7 +17,7 @@ object Main {
       new Convert
     ).foldLeft(
       Seq(
-        ChiselGeneratorAnnotation(() => new ThreeCombineAdder32)
+        ChiselGeneratorAnnotation(() => new AdderFromJson)
       ): AnnotationSeq
     ) { case (annos, stage) => stage.transform(annos) }
       .flatMap {
