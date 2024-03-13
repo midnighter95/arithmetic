@@ -161,7 +161,7 @@ object PrefixTreeSpecTester extends FormalSuite {
       verify(new PrefixAdder(d.prefixGraph.width - 1, d), Seq(BoundedCheck(1)))
     }
     test("should json generate correct adder.") {
-      verify(new PrefixAdder(GraphFromJson.prefixGraph.width - 1, GraphFromJson), Seq(BoundedCheck(1)))
+      verify(new PrefixAdderWithAssert(GraphFromJson.prefixGraph.width - 1, GraphFromJson), Seq(BoundedCheck(1)))
     }
     test("should abort in PrefixNode generation") {
       try {

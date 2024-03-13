@@ -11,7 +11,7 @@ import $file.dependencies.chiseltest.build
 import $file.common
 
 object v {
-  val scala = "2.12.16"
+  val scala = "2.13.10"
   val chisel3 = ivy"edu.berkeley.cs::chisel3:3.6-SNAPSHOT"
   val chisel3Plugin = ivy"edu.berkeley.cs::chisel3-plugin:3.6-SNAPSHOT"
   val chiseltest = ivy"edu.berkeley.cs::chiseltest:3.6-SNAPSHOT"
@@ -58,7 +58,40 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
   def bc: T[Dep] = v.bc
   def utest: T[Dep] = v.utest
   def mainargs: T[Dep] = v.mainargs
-  
+
+
+  def chirrtl = T {
+    os.walk(os.pwd / "output").collectFirst { case p if p.last.endsWith("fir") => p }.map(PathRef(_)).get
+  }
+
+  def chiselAnno = T {
+    os.walk(os.pwd/ "output").collectFirst { case p if p.last.endsWith("anno.json") => p }.map(PathRef(_)).get
+  }
+
+  def topName = T {
+    chirrtl().path.last.split('.').head
+  }
+
+  def mfccompile = T {
+    println("Generate rtl to " + s"${T.dest / topName()}")
+    os.proc("firtool",
+      chirrtl().path,
+      s"--annotation-file=${chiselAnno().path}",
+      "--disable-annotation-unknown",
+      "--strip-fir-debug-info",
+      "--strip-debug-info",
+      "-dedup",
+      "-O=debug",
+      "--verilog",
+      "--preserve-values=named",
+      "--output-annotation-file=mfc.anno.json",
+      "--lowering-options=verifLabels",
+      s"-o=${T.dest / topName()}"
+    ).call(T.dest)
+    PathRef(T.dest)
+  }
+
+
   object tests extends Tests with Utest with ScalafmtModule {
     override def scalacPluginIvyDeps = T { m.scalacPluginIvyDeps() }
     override def scalacOptions = T { m.scalacOptions() }
