@@ -86,7 +86,7 @@ class PrefixAdderWithAssert(val width: Int, prefixSum: PrefixSum) extends FullAd
   z := VecInit(adder.z).asUInt
 }
 
-class PrefixAdderForCadence(val width: Int, prefixSum: PrefixSum) extends FullAdderForCadence {
+class PrefixAdderNetlist(val width: Int, prefixSum: PrefixSum) extends FullAdderNetlist {
   override val desiredName: String = this.getClass.getSimpleName + width.toString
 
 
@@ -110,17 +110,3 @@ class PrefixAdderForCadence(val width: Int, prefixSum: PrefixSum) extends FullAd
   ps.zip(cs).drop(1).dropRight(1).zipWithIndex.foreach { case ((p, c), index) => z(index) := addition.Xor(p, c)}
 }
 
-class Connect(width: Int) extends Module{
-  val in = IO(Input(UInt(width.W)))
-  val out = IO(Output(UInt(width.W)))
-  out := in
-  override def desiredName = s"Connect${width}"
-}
-
-object Connect{
-  def apply(a:UInt, b:UInt) = {
-    val connect = Module(new Connect(a.getWidth))
-    connect.in := a
-    b := connect.out
-  }
-}

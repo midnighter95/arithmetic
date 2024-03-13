@@ -3,7 +3,7 @@ package addition
 import chisel3._
 import chisel3.util.Cat
 
-trait FullAdder extends Module {
+trait FullAdder extends RawModule {
   val width: Int
 //  require(width > 0)
   val a: UInt = IO(Input(UInt(width.W)))
@@ -15,7 +15,7 @@ trait FullAdder extends Module {
 
 }
 
-trait FullAdderWithAssert extends Module {
+trait FullAdderWithAssert extends RawModule {
   val width: Int
   //  require(width > 0)
   val a: UInt = IO(Input(UInt(width.W)))
@@ -27,7 +27,7 @@ trait FullAdderWithAssert extends Module {
 
   assert(a +& b + cin === Cat(cout, z))
 }
-trait FullAdderForCadence extends Module {
+trait FullAdderNetlist extends RawModule {
   val width: Int
   //  require(width > 0)
   val a: UInt = IO(Input(UInt(width.W)))
