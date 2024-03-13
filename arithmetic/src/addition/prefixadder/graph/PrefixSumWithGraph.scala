@@ -1,6 +1,6 @@
 package addition.prefixadder.graph
 
-import addition.prefixadder.PrefixSum
+import addition.prefixadder._
 import chisel3._
 
 trait HasPrefixSumWithGraphImp extends PrefixSum {

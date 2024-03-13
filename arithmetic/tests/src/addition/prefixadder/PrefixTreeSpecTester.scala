@@ -2,6 +2,7 @@ package addition.prefixadder
 
 import addition.prefixadder.common.CommonPrefixSum
 import addition.prefixadder.graph.{HasPrefixSumWithGraphImp, PrefixGraph, PrefixNode}
+import arithmetic.GraphFromJson
 import chiseltest.formal.BoundedCheck
 import formal.FormalSuite
 import utest._
@@ -158,6 +159,9 @@ object PrefixTreeSpecTester extends FormalSuite {
         val prefixGraph: PrefixGraph = PrefixGraph(os.resource / "graph.json")
       }
       verify(new PrefixAdder(d.prefixGraph.width - 1, d), Seq(BoundedCheck(1)))
+    }
+    test("should json generate correct adder.") {
+      verify(new PrefixAdder(GraphFromJson.prefixGraph.width - 1, GraphFromJson), Seq(BoundedCheck(1)))
     }
     test("should abort in PrefixNode generation") {
       try {

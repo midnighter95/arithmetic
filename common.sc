@@ -38,6 +38,7 @@ trait ArithmeticModule extends ScalaModule with PublishModule {
   def evilplot: T[Dep]
   def bc: T[Dep]  
   def utest: T[Dep]
+  def mainargs: T[Dep]
   
   override def moduleDeps = Seq() ++ chisel3Module ++ chiseltestModule
 
@@ -58,6 +59,7 @@ trait ArithmeticModule extends ScalaModule with PublishModule {
       upickle(),
       osLib(),
       spire(),
+      mainargs(),
       evilplot()) ++ 
       chisel3IvyDep()
   }

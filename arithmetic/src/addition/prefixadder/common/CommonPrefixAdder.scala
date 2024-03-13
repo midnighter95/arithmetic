@@ -95,7 +95,7 @@ class PrefixAdd2 extends Module{
 }
 object PrefixAdd2{
   def apply(p0:Bool, g0:Bool, p1:Bool, g1:Bool):(Bool,Bool)={
-    (addition.And(p0,p1), addition.TwoCombineG(g0, p1, g1))
+    (addition.TwoCombineP(p0,p1), addition.TwoCombineG(g0, p1, g1))
   }
 }
 class PrefixAdd3 extends Module{

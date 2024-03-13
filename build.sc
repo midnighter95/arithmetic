@@ -21,6 +21,7 @@ object v {
   val bc = ivy"org.bouncycastle:bcprov-jdk15to18:latest.integration"  
   val spire = ivy"org.typelevel::spire:latest.integration"
   val evilplot = ivy"io.github.cibotech::evilplot:latest.integration"
+  val mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
 }
 
 object myfirrtl extends dependencies.firrtl.build.firrtlCrossModule(v.scala) {
@@ -56,6 +57,7 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
   def evilplot: T[Dep] = v.evilplot
   def bc: T[Dep] = v.bc
   def utest: T[Dep] = v.utest
+  def mainargs: T[Dep] = v.mainargs
   
   object tests extends Tests with Utest with ScalafmtModule {
     override def scalacPluginIvyDeps = T { m.scalacPluginIvyDeps() }
