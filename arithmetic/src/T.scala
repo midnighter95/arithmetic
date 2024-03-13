@@ -2,7 +2,7 @@ package arithmetic
 
 import addition.prefixadder.common._
 import addition._
-import addition.prefixadder.PrefixAdder
+import addition.prefixadder.{PrefixAdder, PrefixAdderWithAssert}
 import addition.prefixadder.graph._
 import chisel3._
 import float._
@@ -46,7 +46,7 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
 
 
 
-class AdderFromJson extends PrefixAdder(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
+class AdderFromJson extends PrefixAdderWithAssert(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 
 
 

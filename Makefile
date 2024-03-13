@@ -28,4 +28,5 @@ test:
 	mill -i -j 0 arithmetic.tests
 
 mfccompile: test run
+	rm -rf out/arithmetic
 	mill -i -j 0 arithmetic.mfccompile
