@@ -17,6 +17,7 @@
           deps = with pkgs; [
             cmake
             zlib
+            z3
 
             mill
             python3
