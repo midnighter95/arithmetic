@@ -38,14 +38,14 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
 
   val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx3)
 
-  GraphToJson.elaborate(dotgraph)
+  val graphJson = GraphToJson.elaborate(dotgraph)
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
-  val prefixGraph: PrefixGraph = PrefixGraph(os.pwd / "output" / "graph.json")
+  val prefixGraph: PrefixGraph = PrefixGraph(graphJson)
 }
 
 
 
-class AdderFromJson extends PrefixAdderNetlist(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
+class AdderFromJsonNetlist extends PrefixAdderNetlist(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 class AdderFromJsonWithAssert extends PrefixAdderWithAssert(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 class AdderFromJsonWithWrapper extends PrefixAdderWithWrapper(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 

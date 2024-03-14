@@ -50,6 +50,26 @@ object PrefixGraph {
       }
     apply(dotMap.values.toSet)
   }
+
+  def apply(jsonStr: String): PrefixGraph = {
+    val dotGraph: DotGraph = upickle.default.read[DotGraph](jsonStr)
+    val pattern: Regex = "Node([0-9]+)-([0-9]+)-([0-9]+)".r
+    var dotMap: Map[Int, PrefixNode] = Map[Int, PrefixNode]()
+    dotGraph.nodes.map { dotNode =>
+        val pattern(level, bit, _) = dotNode.name
+        (dotNode.index, level.toInt, bit.toInt)
+      }
+      .sortBy(_._1)
+      .foreach {
+        case (index: Int, level: Int, bit: Int) =>
+          dotMap += (index -> (if (level == 0) PrefixNode(bit)
+          else
+            PrefixNode(
+              dotGraph.edges.filter(_.head == index).map(dotEdge => dotMap(dotEdge.tail)): _*
+            )))
+      }
+    apply(dotMap.values.toSet)
+  }
 }
 
 object CommonSumByConsole extends HasPrefixSumWithGraphImp with CommonPrefixSum {
