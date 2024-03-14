@@ -10,6 +10,7 @@ target/
 # test
 test_run_dir/
 verdiLog
+output/
 
 .bsp/
 .idea/

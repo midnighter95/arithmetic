@@ -69,11 +69,11 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
   }
 
   def topName = T {
-    chirrtl().path.last.split('.').head
+    chirrtl().path.last.split('.').head + ".v"
   }
 
   def mfccompile = T {
-    println("Generate rtl to " + s"${T.dest / topName()}")
+    println("Generate rtl to " + s"${os.pwd/ "output"}")
     os.proc("firtool",
       chirrtl().path,
       s"--annotation-file=${chiselAnno().path}",
@@ -86,7 +86,7 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
       "--preserve-values=named",
       "--output-annotation-file=mfc.anno.json",
       "--lowering-options=verifLabels",
-      s"-o=${T.dest / topName()}"
+      s"-o=${os.pwd/ "output"/ topName()}"
     ).call(T.dest)
     PathRef(T.dest)
   }

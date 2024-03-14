@@ -21,12 +21,11 @@ reformat:
 checkformat:
 	mill -i __.checkFormat
 
-run:
+firrtl:
 	mill -i -j 0 arithmetic.run
 
 test:
 	mill -i -j 0 arithmetic.tests
 
-mfccompile: test run
-	rm -rf out/arithmetic
+mfccompile: test firrtl
 	mill -i -j 0 arithmetic.mfccompile

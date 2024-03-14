@@ -2,7 +2,7 @@ package arithmetic
 
 import addition.prefixadder.common._
 import addition._
-import addition.prefixadder.{PrefixAdder, PrefixAdderNetlist, PrefixAdderWithAssert}
+import addition.prefixadder.{PrefixAdder, PrefixAdderNetlist, PrefixAdderWithAssert, PrefixAdderWithWrapper}
 import addition.prefixadder.graph._
 import chisel3._
 import float._
@@ -36,17 +36,18 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
   )
 
 
-  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx)
-
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx3)
 
   GraphToJson.elaborate(dotgraph)
-  os.write.over(os.pwd / "graph.graphml", Graphml(dotgraph).toString)
-  val prefixGraph: PrefixGraph = PrefixGraph((os.pwd/"graph.json"))
+  os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
+  val prefixGraph: PrefixGraph = PrefixGraph(os.pwd / "output" / "graph.json")
 }
 
 
 
 class AdderFromJson extends PrefixAdderNetlist(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
+class AdderFromJsonWithAssert extends PrefixAdderWithAssert(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
+class AdderFromJsonWithWrapper extends PrefixAdderWithWrapper(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 
 
 

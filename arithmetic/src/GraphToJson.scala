@@ -25,7 +25,7 @@ object GraphToJson {
       "edges" -> Arr(dotEdges: _*)
     )
 
-    os.write.over(os.pwd / "graph.json", ujson.write(output, indent = 4))
+    os.write.over(os.pwd / "output" / "graph.json", ujson.write(output, indent = 4))
   }
 }
 
