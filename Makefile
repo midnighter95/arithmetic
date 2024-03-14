@@ -24,8 +24,8 @@ checkformat:
 firrtl:
 	mill -i -j 0 arithmetic.run
 
-test:
+test: firrtl
 	mill -i -j 0 arithmetic.tests
 
-mfccompile: test firrtl
+mfccompile: firrtl test
 	mill -i -j 0 arithmetic.mfccompile

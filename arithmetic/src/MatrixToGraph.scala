@@ -13,8 +13,8 @@ object MatrixToGraph {
     val width = matrix.head.length
     val layerNumber = matrix.length
 
-    println("input matrix is")
-    matrix.foreach(println(_))
+    /*println("input matrix is")
+    matrix.foreach(println(_))*/
 
     val indexList = Seq.tabulate(width)(n => width - n)
     val layer0: Seq[Node] = Seq.tabulate(width)(n => Node(width - n))
@@ -31,8 +31,8 @@ object MatrixToGraph {
     assert(!list.takeRight(width).exists(c => (c.position != c.depth)),
       "there is a final level node can't satisfy pos == depth" + s" , position = ${list.takeRight(width).filter(c => (c.position != c.depth)).map(_.position).mkString(" ")}")
 
-    println("After resolving, output node(level-position-index) matrix is ")
-    list.grouped(width).foreach(println(_))
+    /*println("After resolving, output node(level-position-index) matrix is ")
+    list.grouped(width).foreach(println(_))*/
     val distinctList: Seq[Node] = list.distinct.toSeq
     val listWithIndex: Seq[Node] = distinctList.sorted
       .zip(Seq.tabulate(distinctList.length)(n => n + 1))

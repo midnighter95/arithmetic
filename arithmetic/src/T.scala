@@ -9,8 +9,6 @@ import float._
 import os._
 
 object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
-  println("This is playgorund")
-
   val matirx = Seq(
     Seq(1, 3, 2, 1),
     Seq(2, 1, 1, 1)
@@ -47,9 +45,8 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
 
   val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matrix32)
 
-  val graphJson = GraphToJson.elaborate(dotgraph)
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
-  val prefixGraph: PrefixGraph = PrefixGraph(graphJson)
+  val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))
 }
 
 
