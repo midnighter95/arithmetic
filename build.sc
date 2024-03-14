@@ -69,7 +69,7 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
   }
 
   def topName = T {
-    chirrtl().path.last.split('.').head + ".v"
+    chirrtl().path.last.split('.').head
   }
 
   def mfccompile = T {
