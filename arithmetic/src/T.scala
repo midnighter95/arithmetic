@@ -35,8 +35,17 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(2, 2, 2, 2, 1, 1, 1, 1),
   )
 
+  val matrix32 = Seq(
+    Seq(4,3,2,1,  4,3,2,1,  4,3,2,1,   4,3,2,1,      4,3,2,1,  4,3,2,1,  4,1,2,1,  4,1,2,1),
+    //                      完成大组内 depth = n-16
+    Seq(4,4,4,4,  3,3,3,3,  2,2,2,2,   1,1,1,1,      4,4,4,4,  3,3,3,3,  1,2,1,1,  1,2,1,1), // 下半组计算完成
+    //                                 结合上大组
+    Seq(2,2,2,2,  2,2,2,2,  2,2,2,2,   2,2,2,2,      1,1,1,1,  1,1,1,1,  2,2,2,2,  1,1,1,1)
+    //
+  )
 
-  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matirx3)
+
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(matrix32)
 
   val graphJson = GraphToJson.elaborate(dotgraph)
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)

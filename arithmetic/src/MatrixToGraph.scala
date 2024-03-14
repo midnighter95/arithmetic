@@ -28,7 +28,8 @@ object MatrixToGraph {
         .map(c => Node(c._1, getFatherNodes(c._2, list.takeRight(width).takeRight(c._1).toSeq)))
         .foreach(list.append(_))
     }
-    assert(!list.takeRight(width).exists(c => (c.position != c.depth)), "there is a final level node can't satisfy pos == depth")
+    assert(!list.takeRight(width).exists(c => (c.position != c.depth)),
+      "there is a final level node can't satisfy pos == depth" + s" , position = ${list.takeRight(width).filter(c => (c.position != c.depth)).map(_.position).mkString(" ")}")
 
     println("After resolving, output node(level-position-index) matrix is ")
     list.grouped(width).foreach(println(_))
