@@ -79,6 +79,10 @@ object GeneratePG{
   def apply(a:Bool, b:Bool):(Bool,Bool)={
     (addition.Xor(a,b), addition.And(a,b))
   }
+
+  def apply(a: Bool, b: Bool, index: Int): (Bool, Bool) = {
+    (addition.Xor(a, b, index), addition.And(a, b, index))
+  }
 }
 
 class PrefixAdd2 extends Module{

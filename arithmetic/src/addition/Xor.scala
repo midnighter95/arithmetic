@@ -17,4 +17,11 @@ object Xor {
     xor.b := b
     xor.z
   }
+
+  def apply(a: Bool, b: Bool, index:Int): Bool = {
+    val xor = Module(new Xor).suggestName(s"p$index")
+    xor.a := a
+    xor.b := b
+    xor.z
+  }
 }

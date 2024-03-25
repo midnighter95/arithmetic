@@ -17,4 +17,11 @@ object And {
     and.b := b
     and.z
   }
+
+  def apply(a: Bool, b: Bool, index:Int): Bool = {
+    val and = Module(new And).suggestName(s"g$index")
+    and.a := a
+    and.b := b
+    and.z
+  }
 }
