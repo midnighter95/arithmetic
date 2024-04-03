@@ -83,6 +83,13 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,       1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
   )
 
+  val verison4 = Seq(
+    Seq(1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 1, 2, 1,     4, 3, 2, 1, 4, 3, 2, 1, 4, 3, 2, 1, 4, 1, 2, 1,    4, 1, 2, 1, 4, 1, 2, 1, 4, 1, 2, 1, 4, 1, 2, 1,     4, 3, 2, 1, 4, 1, 2, 1, 4, 1, 2, 1, 4, 1, 2, 1),
+    Seq(1, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 2, 1, 1,     4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 1, 2, 1, 1,    4, 2, 1, 1, 3, 2, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1,     4, 2, 2, 2, 3, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1), // 下半组计算完成     结合上大组
+    Seq(1, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,     3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2,     1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1),
+    Seq(2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,     1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,    1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1, 1, 1,     1, 2, 2, 2, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1)
+  )
+
   val ks64 = Seq(
     Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,1),
     Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,1,1),
@@ -93,12 +100,38 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(2,1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1),
   )
 
+    val newtest = Seq(
+      Seq(1, 1, 1, 2, 1),
+      Seq(4, 3, 2, 1, 1)
+    )
 
-  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(verison3)
+
+
+  val dotgraph: Seq[Node] = MatrixToGraphtestWithDuplicate.elabroate(verison4)
 
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
   val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))
 }
+
+//object T extends App{
+//
+//  val newtest = Seq(
+//    Seq(1, 1, 1, 2, 1),
+//    Seq(4, 3, 2, 1, 1)
+//  )
+//
+//  val demo = Seq(
+//    Seq(4, 3, 2, 1, 4, 3, 2, 1),
+//    Seq(2, 2, 2, 2, 1, 1, 1, 1),
+//  )
+//
+//  println("this is T")
+//
+//  val dotgraph: Seq[Node] = MatrixToGraphtest.elabroate(demo)
+//
+//  os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
+//  val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))
+//}
 
 
 

@@ -64,9 +64,12 @@ object PrefixGraph {
         case (index: Int, level: Int, bit: Int) =>
           dotMap += (index -> (if (level == 0) PrefixNode(bit)
           else
-            PrefixNode(
-              dotGraph.edges.filter(_.head == index).map(dotEdge => dotMap(dotEdge.tail)): _*
-            )))
+            {
+              PrefixNode(
+                dotGraph.edges.filter(_.head == index).map(dotEdge => dotMap(dotEdge.tail)): _*
+              )
+            }
+            ))
       }
     apply(dotMap.values.toSet)
   }
