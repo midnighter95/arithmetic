@@ -1,6 +1,7 @@
 package arithmetic
 
 import addition.prefixadder.PrefixAdderWithAssert
+import addition.prefixadder.common.KoggeStoneAdder
 import chisel3.stage.ChiselGeneratorAnnotation
 import chisel3.stage.phases.Convert
 import firrtl.AnnotationSeq
