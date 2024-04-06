@@ -83,7 +83,7 @@ object arithmetic extends common.ArithmeticModule with ScalafmtModule { m =>
       "-dedup",
       "-O=debug",
       "--verilog",
-      "--split-verilog",
+//      "--split-verilog",
       "--preserve-values=named",
       "--output-annotation-file=mfc.anno.json",
       "--lowering-options=verifLabels",

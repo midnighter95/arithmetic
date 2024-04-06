@@ -107,6 +107,31 @@ class PrefixAdderWithWrapper(val width: Int, prefixSum: PrefixSum) extends FullA
   z := VecInit(adder.z).asUInt
 }
 
+class PrefixAdderWithReg(val width: Int, prefixSum: PrefixSum) extends FullAdder {
+  override val desiredName: String = this.getClass.getSimpleName + width.toString
+
+  val aReg = RegInit(Wire(UInt(64.W)))
+  val bReg = RegInit(Wire(UInt(64.W)))
+  val cReg = RegInit(Wire(Bool()))
+
+  aReg := a
+  bReg := b
+  cReg := cin
+
+  val adder = Module(new PrefixAdderNetlist(width, prefixSum))
+
+  val as = aReg.asBools
+  val bs = bReg.asBools
+
+  Seq.tabulate(width)(i=>i).foreach(i => adder.a(i) := as(i))
+  Seq.tabulate(width)(i=>i).foreach(i => adder.b(i) := bs(i))
+  adder.cin := cReg
+
+
+  cout := adder.cout
+  z := VecInit(adder.z).asUInt
+}
+
 class PrefixAdderNetlist(val width: Int, prefixSum: PrefixSum) extends FullAdderNetlist {
   override val desiredName: String = this.getClass.getSimpleName + width.toString
 
