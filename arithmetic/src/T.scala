@@ -106,40 +106,91 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     )
 
 
+  val fisher16 = Seq(
+    Seq(2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1),
+    Seq(2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1),
+    Seq(2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1),
+    Seq(2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1),
+  )
 
-  val dotgraph: Seq[Node] = MatrixToGraphtestWithDuplicate.elabroate(ks64)
+
+  val ks16 = Seq(
+    Seq(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1),
+    Seq(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1),
+    Seq(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1),
+    Seq(2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1),
+  )
+
+
+  val bk16 = Seq(
+    Seq(2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1),
+    Seq(2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1),
+    Seq(2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1),
+    Seq(2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    Seq(1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1),
+    Seq(1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1)
+  )
+
+
+
+
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(bk16)
 
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
   val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))
 }
 
-//object T extends App{
-//
-//  val newtest = Seq(
-//    Seq(1, 1, 1, 2, 1),
-//    Seq(4, 3, 2, 1, 1)
-//  )
-//
-//  val demo = Seq(
-//    Seq(4, 3, 2, 1, 4, 3, 2, 1),
-//    Seq(2, 2, 2, 2, 1, 1, 1, 1),
-//  )
-//
-//  println("this is T")
-//
-//  val dotgraph: Seq[Node] = MatrixToGraphtest.elabroate(demo)
-//
-//  os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
-//  val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))
-//}
 
 
+class KSAdder64L extends Module{
+  val a    = IO(Input(UInt(64.W)))
+  val b    = IO(Input(UInt(64.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(64.W)))
+  val cout = IO(Output(Bool()))
+
+  val aReg = RegNext(a)
+  val bReg = RegNext(b)
+  val cinReg = RegNext(cin)
+
+  val m = Module(new PrefixAdderWithWrapper(GraphFromJson.prefixGraph.width - 1, GraphFromJson))
+  m.a := aReg
+  m.b := bReg
+  m.cin := cinReg
+
+  val zReg = RegNext(m.z)
+  val coutReg = RegNext(m.cout)
+
+  z := zReg
+  cout := coutReg
+}
+
+class DemoAdder64L extends Module{
+  val a    = IO(Input(UInt(64.W)))
+  val b    = IO(Input(UInt(64.W)))
+  val cin  = IO(Input(Bool()))
+  val z    = IO(Output(UInt(64.W)))
+  val cout = IO(Output(Bool()))
+
+  val aReg = RegNext(a)
+  val bReg = RegNext(b)
+  val cinReg = RegNext(cin)
+
+  val m = Module(new PrefixAdderWithWrapper(GraphFromJson.prefixGraph.width - 1, GraphFromJson))
+  m.a := aReg
+  m.b := bReg
+  m.cin := cinReg
+
+  val zReg = RegNext(m.z)
+  val coutReg = RegNext(m.cout)
+
+  z := zReg
+  cout := coutReg
+}
 
 class AdderFromJsonNetlist extends PrefixAdderNetlist(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 class AdderFromJsonWithAssert extends PrefixAdderWithAssert(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 class AdderFromJsonWithWrapper extends PrefixAdderWithWrapper(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
-
-class AdderFromJsonWithReg extends PrefixAdderWithReg(GraphFromJson.prefixGraph.width - 1, GraphFromJson)
 
 
 

@@ -7,6 +7,10 @@ import chisel3.stage.phases.Convert
 import firrtl.AnnotationSeq
 import firrtl.stage.FirrtlCircuitAnnotation
 import mainargs._
+import division._
+import division.srt.srt4.SRT4
+import division.srt.srt8.SRT8
+import division.srt.srt16.SRT16
 
 object Main extends App
   {
