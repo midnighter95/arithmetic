@@ -24,7 +24,7 @@ object Main extends App
       new Convert
     ).foldLeft(
       Seq(
-        ChiselGeneratorAnnotation(() => new AdderFromJsonWithReg)
+        ChiselGeneratorAnnotation(() => new AdderFromJsonWithWrapper)
       ): AnnotationSeq
     ) { case (annos, stage) => stage.transform(annos) }
       .flatMap {
