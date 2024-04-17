@@ -24,7 +24,7 @@ object Main extends App
       new Convert
     ).foldLeft(
       Seq(
-        ChiselGeneratorAnnotation(() => new SRT4DividerDataModule(64))
+        ChiselGeneratorAnnotation(() => new AdderFromJsonWithWrapper)
       ): AnnotationSeq
     ) { case (annos, stage) => stage.transform(annos) }
       .flatMap {
@@ -33,6 +33,7 @@ object Main extends App
           os.write.over(pwd /  s"$topName.fir", circuit.serialize)
           None
         case _: chisel3.stage.DesignAnnotation[_] => None
+        case _: chisel3.stage.ChiselCircuitAnnotation => None
         case a => Some(a)
       }
     os.write.over(os.pwd / "output" / s"$topName.anno.json", firrtl.annotations.JsonProtocol.serialize(annos))

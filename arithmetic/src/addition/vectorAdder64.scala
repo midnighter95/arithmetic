@@ -209,6 +209,8 @@ class vectorAdder64 extends Module {
     sew(3) -> cout64,
   ))
 
+  cout := cout64
+
   val ps = VecInit(pairs.map(_._1)).asUInt
 
   z := ps ^ cs

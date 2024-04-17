@@ -110,6 +110,7 @@ object SRT16Test extends TestSuite with ChiselUtestTester {
 //          testcase(5, i, j)
 //        }
 //      }
+//      testcase(32, 1073741824, 3)
 
     }
   }

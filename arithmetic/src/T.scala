@@ -100,6 +100,15 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(2,1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1),
   )
 
+  val ks32 = Seq(
+    Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,1),
+    Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,1,1),
+    Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 2,2,2,2, 1,1,1,1),
+    Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   2,2,2,2, 2,2,2,2, 1,1,1,1, 1,1,1,1),
+    Seq(1,2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1),
+    Seq(2,1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,   1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1),
+  )
+
     val newtest = Seq(
       Seq(1, 1, 1, 2, 1),
       Seq(4, 3, 2, 1, 1)
@@ -131,10 +140,17 @@ object GraphFromJson extends CommonPrefixSum with HasPrefixSumWithGraphImp{
     Seq(1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1)
   )
 
+  val bk17 = Seq(
+    Seq(1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1),
+    Seq(1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1),
+    Seq(1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1),
+    Seq(1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    Seq(2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1),
+    Seq(1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1)
+  )
 
 
-
-  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(bk16)
+  val dotgraph: Seq[Node] = MatrixToGraph.elabroate(bk17)
 
   os.write.over(os.pwd / "output" / "graph.graphml", Graphml(dotgraph).toString)
   val prefixGraph: PrefixGraph = PrefixGraph(GraphToJson.elaborate(dotgraph))

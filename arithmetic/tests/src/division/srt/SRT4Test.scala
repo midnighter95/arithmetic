@@ -106,6 +106,7 @@ object SRT4Test extends TestSuite with ChiselUtestTester {
 //                testcase(4, i, j)
 //              }
 //            }
+//      testcase(32, 1073741824, 3)
 
     }
   }

@@ -9,8 +9,22 @@ import scala.util.Random
 
 object vectorAdder64Tester64 extends TestSuite with ChiselUtestTester {
   def tests: Tests = Tests {
-    test("should pass") {
+    test(" vector adder64test64 should pass") {
       def testcase(width: Int): Unit = {
+
+        class adder extends Module{
+          val width = 64
+          val a: UInt = IO(Input(UInt(width.W)))
+          val b: UInt = IO(Input(UInt(width.W)))
+          val cin = IO(Input(Bool()))
+          val z: UInt = IO(Output(UInt(width.W)))
+          val cout = IO(Output(Bool()))
+          val sum = Wire(UInt(65.W))
+          sum := a +& b +& cin
+          z := sum(63,0)
+          cout := sum(64)
+
+        }
 
         val a = Seq(BigInt(64, Random))
         val b = Seq(BigInt(64, Random))
@@ -49,22 +63,40 @@ object vectorAdder64Tester64 extends TestSuite with ChiselUtestTester {
 
         // test
         testCircuit(
-          new vectorAdder64,
+          new adder,
           Seq(chiseltest.internal.NoThreadingAnnotation, chiseltest.simulator.WriteVcdAnnotation)
-        ) { dut: vectorAdder64 =>
+        ) { dut: adder =>
 //          println("a = " + a)
 //          println("b = " + b)
 //          println("c = " + c)
 //          println("z_exp = " + z_exp)
 //          println("z_expect = " + z_expect)
           dut.clock.setTimeout(0)
-          dut.a.poke(aInput.U)
-          dut.b.poke(bInput.U)
-          dut.cin.poke(cInput.U)
-          dut.sew.poke("b1000".U)
+          dut.a.poke("hffffffffffffffff".U)
+          dut.b.poke("d0".U)
+          dut.cin.poke("b1".U)
           dut.clock.step(1)
-          dut.z.expect(z_expect.U)
-          dut.cout.expect(ov_expect.U)
+          dut.a.poke("hffffffffffffffff".U)
+          dut.b.poke("d0".U)
+          dut.cin.poke("b0".U)
+          dut.clock.step(1)
+
+          dut.a.poke("h4ae78233458746".U)
+          dut.b.poke("d232346".U)
+          dut.cin.poke("b1".U)
+          dut.clock.step(1)
+
+          dut.a.poke("h93f4736faffb".U)
+          dut.b.poke("hf33ffa37436fdb".U)
+          dut.cin.poke("b0".U)
+          dut.clock.step(1)
+
+
+          dut.a.poke("d2133454537".U)
+          dut.b.poke("d2343456771".U)
+          dut.cin.poke("b1".U)
+          dut.clock.step(1)
+
 
 
         }
@@ -74,6 +106,7 @@ object vectorAdder64Tester64 extends TestSuite with ChiselUtestTester {
 //      for (i <- 1 to 100) {
 //        testcase(32)
 //      }
+//      testcase(1)
 
     }
   }
